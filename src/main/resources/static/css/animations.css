@@ -1,0 +1,573 @@
+/* ============================================
+   CSS Custom Properties for Animations
+   ============================================ */
+:root {
+    --animation-duration-fast: 0.2s;
+    --animation-duration-normal: 0.3s;
+    --animation-duration-slow: 0.5s;
+    --animation-easing: cubic-bezier(0.4, 0, 0.2, 1);
+    --animation-bounce: cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+/* ============================================
+   Keyframe Animations
+   ============================================ */
+
+/* Fade In */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+/* Fade In Up */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Fade In Down */
+@keyframes fadeInDown {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Fade In Left */
+@keyframes fadeInLeft {
+    from {
+        opacity: 0;
+        transform: translateX(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+/* Fade In Right */
+@keyframes fadeInRight {
+    from {
+        opacity: 0;
+        transform: translateX(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+/* Scale In */
+@keyframes scaleIn {
+    from {
+        opacity: 0;
+        transform: scale(0.9);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+/* Pulse */
+@keyframes pulse {
+    0%, 100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.7;
+    }
+}
+
+/* Pulse Glow (for status badges) */
+@keyframes pulseGlow {
+    0%, 100% {
+        box-shadow: 0 0 0 0 rgba(255, 193, 7, 0.4);
+    }
+    50% {
+        box-shadow: 0 0 0 8px rgba(255, 193, 7, 0);
+    }
+}
+
+/* Shake (for validation errors) */
+@keyframes shake {
+    0%, 100% {
+        transform: translateX(0);
+    }
+    10%, 30%, 50%, 70%, 90% {
+        transform: translateX(-5px);
+    }
+    20%, 40%, 60%, 80% {
+        transform: translateX(5px);
+    }
+}
+
+/* Bounce */
+@keyframes bounce {
+    0%, 100% {
+        transform: translateY(0);
+    }
+    50% {
+        transform: translateY(-5px);
+    }
+}
+
+/* Slide In Up (for modals) */
+@keyframes slideInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Ripple effect */
+@keyframes ripple {
+    0% {
+        transform: scale(0);
+        opacity: 0.5;
+    }
+    100% {
+        transform: scale(4);
+        opacity: 0;
+    }
+}
+
+/* Spin (for loading) */
+@keyframes spin {
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* Underline Slide */
+@keyframes underlineSlide {
+    from {
+        transform: scaleX(0);
+    }
+    to {
+        transform: scaleX(1);
+    }
+}
+
+/* ============================================
+   Animation Utility Classes
+   ============================================ */
+
+.animate-fade-in {
+    animation: fadeIn var(--animation-duration-normal) var(--animation-easing) forwards;
+}
+
+.animate-fade-in-up {
+    animation: fadeInUp var(--animation-duration-normal) var(--animation-easing) forwards;
+}
+
+.animate-fade-in-down {
+    animation: fadeInDown var(--animation-duration-normal) var(--animation-easing) forwards;
+}
+
+.animate-fade-in-left {
+    animation: fadeInLeft var(--animation-duration-normal) var(--animation-easing) forwards;
+}
+
+.animate-fade-in-right {
+    animation: fadeInRight var(--animation-duration-normal) var(--animation-easing) forwards;
+}
+
+.animate-scale-in {
+    animation: scaleIn var(--animation-duration-normal) var(--animation-easing) forwards;
+}
+
+.animate-pulse {
+    animation: pulse 2s ease-in-out infinite;
+}
+
+.animate-shake {
+    animation: shake 0.5s ease-in-out;
+}
+
+.animate-bounce {
+    animation: bounce 0.5s var(--animation-bounce);
+}
+
+.animate-spin {
+    animation: spin 1s linear infinite;
+}
+
+/* Staggered animation delays for lists */
+.stagger-1 { animation-delay: 0.05s; }
+.stagger-2 { animation-delay: 0.1s; }
+.stagger-3 { animation-delay: 0.15s; }
+.stagger-4 { animation-delay: 0.2s; }
+.stagger-5 { animation-delay: 0.25s; }
+.stagger-6 { animation-delay: 0.3s; }
+.stagger-7 { animation-delay: 0.35s; }
+.stagger-8 { animation-delay: 0.4s; }
+.stagger-9 { animation-delay: 0.45s; }
+.stagger-10 { animation-delay: 0.5s; }
+
+/* Initial state for staggered animations */
+.animate-stagger {
+    opacity: 0;
+}
+
+/* ============================================
+   Navigation Animations
+   ============================================ */
+
+/* Nav link hover underline effect */
+.nav-link-animated {
+    position: relative;
+    transition: color var(--animation-duration-fast) var(--animation-easing);
+}
+
+.nav-link-animated::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    width: 0;
+    height: 2px;
+    background: var(--dark-primary, #bb86fc);
+    transition: all var(--animation-duration-normal) var(--animation-easing);
+    transform: translateX(-50%);
+}
+
+.nav-link-animated:hover::after,
+.nav-link-animated.active::after {
+    width: 80%;
+}
+
+/* Nav icon bounce on hover */
+.nav-link-animated:hover .bi {
+    animation: bounce 0.4s var(--animation-bounce);
+}
+
+/* Avatar hover effect */
+.avatar-animated {
+    transition: transform var(--animation-duration-fast) var(--animation-easing),
+                box-shadow var(--animation-duration-fast) var(--animation-easing);
+}
+
+.avatar-animated:hover {
+    transform: scale(1.1);
+    box-shadow: 0 0 15px rgba(187, 134, 252, 0.5);
+}
+
+/* IP Badge pulse */
+.badge-pulse {
+    animation: pulse 2s ease-in-out infinite;
+}
+
+/* ============================================
+   Card Animations
+   ============================================ */
+
+.card-animated {
+    transition: transform var(--animation-duration-normal) var(--animation-easing),
+                box-shadow var(--animation-duration-normal) var(--animation-easing),
+                border-color var(--animation-duration-normal) var(--animation-easing);
+}
+
+.card-animated:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.3);
+    border-color: var(--dark-primary, #bb86fc);
+}
+
+/* Navigation cards on dashboard */
+.nav-card-animated {
+    opacity: 0;
+    animation: fadeInUp var(--animation-duration-slow) var(--animation-easing) forwards;
+}
+
+.nav-card-animated:nth-child(1) { animation-delay: 0.1s; }
+.nav-card-animated:nth-child(2) { animation-delay: 0.2s; }
+.nav-card-animated:nth-child(3) { animation-delay: 0.3s; }
+.nav-card-animated:nth-child(4) { animation-delay: 0.4s; }
+.nav-card-animated:nth-child(5) { animation-delay: 0.5s; }
+.nav-card-animated:nth-child(6) { animation-delay: 0.6s; }
+
+/* Card icon animation */
+.card-animated .bi,
+.nav-card-animated .bi {
+    transition: transform var(--animation-duration-normal) var(--animation-easing);
+}
+
+.card-animated:hover .bi,
+.nav-card-animated:hover .bi {
+    transform: scale(1.2);
+}
+
+/* ============================================
+   Table Animations
+   ============================================ */
+
+/* Table row hover effect */
+.table-animated tbody tr {
+    transition: background-color var(--animation-duration-fast) var(--animation-easing),
+                transform var(--animation-duration-fast) var(--animation-easing);
+}
+
+.table-animated tbody tr:hover {
+    background-color: rgba(187, 134, 252, 0.08) !important;
+    transform: scale(1.01);
+}
+
+/* Staggered row entrance - animation delay is set dynamically via JavaScript for unlimited rows */
+.table-animated tbody tr {
+    opacity: 0;
+    animation: fadeInUp var(--animation-duration-normal) var(--animation-easing) forwards;
+}
+
+/* ============================================
+   Button Animations
+   ============================================ */
+
+.btn-animated {
+    position: relative;
+    overflow: hidden;
+    transition: transform var(--animation-duration-fast) var(--animation-easing),
+                box-shadow var(--animation-duration-fast) var(--animation-easing),
+                background-color var(--animation-duration-fast) var(--animation-easing);
+}
+
+.btn-animated:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+}
+
+.btn-animated:active {
+    transform: translateY(0) scale(0.98);
+}
+
+/* Button ripple effect */
+.btn-animated::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    background: rgba(255, 255, 255, 0.3);
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    transition: width 0.6s, height 0.6s;
+}
+
+.btn-animated:active::before {
+    width: 300px;
+    height: 300px;
+    opacity: 0;
+}
+
+/* Icon button spin on hover */
+.btn-icon-spin:hover .bi {
+    animation: spin 0.5s var(--animation-easing);
+}
+
+/* ============================================
+   Form Animations
+   ============================================ */
+
+/* Input focus effect */
+.form-control-animated,
+.form-select-animated {
+    transition: border-color var(--animation-duration-fast) var(--animation-easing),
+                box-shadow var(--animation-duration-fast) var(--animation-easing),
+                transform var(--animation-duration-fast) var(--animation-easing);
+}
+
+.form-control-animated:focus,
+.form-select-animated:focus {
+    border-color: var(--dark-primary, #bb86fc);
+    box-shadow: 0 0 0 3px rgba(187, 134, 252, 0.25);
+    transform: translateY(-1px);
+}
+
+/* Validation shake */
+.form-control-animated.is-invalid,
+.form-select-animated.is-invalid {
+    animation: shake 0.5s ease-in-out;
+}
+
+/* Form group label animation */
+.form-label-animated {
+    transition: color var(--animation-duration-fast) var(--animation-easing);
+}
+
+.form-control-animated:focus + .form-label-animated,
+.form-control-animated:focus ~ .form-label-animated {
+    color: var(--dark-primary, #bb86fc);
+}
+
+/* ============================================
+   Status Badge Animations
+   ============================================ */
+
+/* In Progress badge pulse glow */
+.badge-status-in-progress {
+    animation: pulseGlow 2s ease-in-out infinite;
+}
+
+/* Status badge transitions */
+.badge-status {
+    transition: transform var(--animation-duration-fast) var(--animation-easing),
+                box-shadow var(--animation-duration-fast) var(--animation-easing);
+}
+
+.badge-status:hover {
+    transform: scale(1.1);
+}
+
+/* ============================================
+   Modal Animations
+   ============================================ */
+
+.modal.fade .modal-dialog {
+    transition: transform var(--animation-duration-normal) var(--animation-easing),
+                opacity var(--animation-duration-normal) var(--animation-easing);
+    transform: translateY(-30px) scale(0.95);
+}
+
+.modal.show .modal-dialog {
+    transform: translateY(0) scale(1);
+}
+
+/* Modal content entrance */
+.modal-content-animated {
+    animation: slideInUp var(--animation-duration-normal) var(--animation-easing);
+}
+
+/* ============================================
+   Alert Animations
+   ============================================ */
+
+.alert-animated {
+    animation: fadeInDown var(--animation-duration-normal) var(--animation-easing);
+}
+
+/* Alert auto-dismiss fade out */
+.alert-dismissing {
+    animation: fadeIn var(--animation-duration-normal) var(--animation-easing) reverse forwards;
+}
+
+/* Alert hover effect */
+.alert-animated:hover {
+    transform: translateX(5px);
+    transition: transform var(--animation-duration-fast) var(--animation-easing);
+}
+
+/* ============================================
+   Page Transition
+   ============================================ */
+
+.page-content {
+    animation: fadeIn var(--animation-duration-slow) var(--animation-easing);
+}
+
+/* ============================================
+   Loading States
+   ============================================ */
+
+.loading-spinner {
+    display: inline-block;
+    width: 1rem;
+    height: 1rem;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-radius: 50%;
+    border-top-color: #fff;
+    animation: spin 0.8s linear infinite;
+}
+
+.btn-loading {
+    pointer-events: none;
+    opacity: 0.7;
+}
+
+.btn-loading .btn-text {
+    visibility: hidden;
+}
+
+.btn-loading .loading-spinner {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+/* Skeleton loading */
+.skeleton {
+    background: linear-gradient(90deg, 
+        var(--dark-surface, #1e1e1e) 25%, 
+        var(--dark-hover, #2a2a2a) 50%, 
+        var(--dark-surface, #1e1e1e) 75%);
+    background-size: 200% 100%;
+    animation: skeleton-loading 1.5s infinite;
+    border-radius: 4px;
+}
+
+@keyframes skeleton-loading {
+    0% {
+        background-position: 200% 0;
+    }
+    100% {
+        background-position: -200% 0;
+    }
+}
+
+/* ============================================
+   Icon Animations
+   ============================================ */
+
+.icon-animated {
+    transition: transform var(--animation-duration-fast) var(--animation-easing);
+}
+
+.icon-animated:hover {
+    transform: scale(1.2);
+}
+
+/* Icon wiggle */
+.icon-wiggle:hover {
+    animation: shake 0.3s ease-in-out;
+}
+
+/* Icon float */
+.icon-float {
+    animation: bounce 2s ease-in-out infinite;
+}
+
+/* ============================================
+   Accessibility: Reduced Motion
+   ============================================ */
+
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+}

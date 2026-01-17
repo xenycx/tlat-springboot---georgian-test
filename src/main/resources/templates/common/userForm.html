@@ -1,0 +1,156 @@
+<div th:fragment="login-form">
+    <div class="card card-animated">
+        <div class="card-body p-5">
+            <div class="text-center mb-4">
+                <h2 class="fw-bold">მომხმარებლის ინფორმაცია</h2>
+                <p class="text-muted">შეიყვანეთ მომხამრებლის დეტალები</p>
+            </div>
+
+            <!-- მომხმარებლის ავატარები -->
+            <div class="row mb-4">
+                <div class="col-12 text-center">
+                    <div class="avatar-upload-container">
+                        <div class="avatar-preview mb-3">
+                            <img id="avatarPreview" 
+                                 th:src="${user.avatarPath != null} ? @{'/avatars/' + ${user.avatarPath}} : @{/images/default-avatar.svg}"
+                                 alt="Avatar Preview" 
+                                 class="rounded-circle avatar-animated" 
+                                 style="width: 120px; height: 120px; object-fit: cover; border: 3px solid #6c757d;">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">პროფილის სურათი</label>
+                            <input type="file" 
+                                   class="form-control" 
+                                   id="avatarFile" 
+                                   name="avatarFile" 
+                                   accept="image/jpeg,image/png,image/gif,image/webp"
+                                   onchange="previewAvatar(this)">
+                            <small class="text-muted">დაშვებული ფორმატები: JPG, PNG, GIF, WEBP (მაქს. 5MB)</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="form-group mb-3">
+                        <label class="form-label">სახელი</label>
+                        <input class="form-control form-control-animated" id="firstName" name="firstName"
+                            placeholder="შეიყვანეთ სახელი" th:field="*{firstName}" type="text" required />
+                        <p th:errors="*{firstName}" class="text-danger"
+                            th:if="${#fields.hasErrors('firstName')}"></p>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group mb-3">
+                        <label class="form-label">გვარი</label>
+                        <input class="form-control form-control-animated" id="lastName" name="lastName" 
+                            placeholder="შეიყვანეთ გვარი" th:field="*{lastName}" type="text" required />
+                        <p th:errors="*{lastName}" class="text-danger" 
+                            th:if="${#fields.hasErrors('lastName')}"></p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="form-group mb-3">
+                        <label class="form-label">გენდერი</label>
+                        <select class="form-select form-select-animated" id="gender" name="gender" 
+                            th:field="*{gender}" required>
+                            <option value="Male">კაცი</option>
+                            <option value="Female">ქალი</option>
+                        </select>
+                        <p th:errors="*{gender}" class="text-danger" 
+                            th:if="${#fields.hasErrors('gender')}"></p>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group mb-3">
+                        <label class="form-label">ასაკი</label>
+                        <input class="form-control form-control-animated" id="age" name="age" 
+                            placeholder="შეიყვანეთ ასაკი" th:field="*{age}" type="number" required />
+                        <p th:errors="*{age}" class="text-danger" 
+                            th:if="${#fields.hasErrors('age')}"></p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="form-group mb-3">
+                        <label class="form-label">მეილი</label>
+                        <input class="form-control form-control-animated" id="email" name="email" 
+                            placeholder="შეიყვანეთ მეილი" th:field="*{email}" type="email" />
+                        <p th:errors="*{email}" class="text-danger" 
+                            th:if="${#fields.hasErrors('email')}"></p>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group mb-3">
+                        <label class="form-label">ტელეფონი</label>
+                        <input class="form-control form-control-animated" id="phone" name="phone"
+                            placeholder="შეიყვანეთ ტელეფონის ნომერი" th:field="*{phone}" type="text" required />
+                        <p th:errors="*{phone}" class="text-danger" 
+                            th:if="${#fields.hasErrors('phone')}"></p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="form-group mb-3">
+                        <label class="form-label">მისამართი</label>
+                        <input class="form-control form-control-animated" id="address" name="address" 
+                            placeholder="შეიყვანეთ მისამართი" th:field="*{address}" type="text" required />
+                        <p th:errors="*{address}" class="text-danger" 
+                            th:if="${#fields.hasErrors('address')}"></p>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group mb-3">
+                        <label class="form-label">პაროლი</label>
+                        <input class="form-control form-control-animated" id="password" name="password" 
+                            placeholder="შეიყვანეთ პაროლი" th:field="*{password}" type="password" />
+                        <p th:errors="*{password}" class="text-danger" 
+                            th:if="${#fields.hasErrors('password')}"></p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-group mb-3">
+                <label for="username">ზედმეტსახელი</label>
+                <input type="text" class="form-control form-control-animated" id="username" name="username" 
+                       th:field="*{username}" placeholder="შეიყვანეთ ზედმეტსახელი">
+                <p th:if="${#fields.hasErrors('username')}" class="text-danger" 
+                   th:errors="*{username}"></p>
+            </div>
+
+            <div class="row" th:if="${#authorization.expression('hasRole(''ADMIN'')')}">
+                <div class="col-md-6">
+                    <div class="form-group mb-3">
+                        <label class="form-label">როლი</label>
+                        <select class="form-select form-select-animated" id="role" name="role" th:field="*{role}">
+                            <option value="ROLE_USER">მომხმარებელი</option>
+                            <option value="ROLE_ADMIN">ადმინისტრატორი</option>
+                        </select>
+                        <p th:errors="*{role}" class="text-danger" 
+                            th:if="${#fields.hasErrors('role')}"></p>
+                    </div>
+                </div>
+            </div>
+            
+            <script>
+                function previewAvatar(input) {
+                    if (input.files && input.files[0]) {
+                        var reader = new FileReader();
+                        reader.onload = function(e) {
+                            document.getElementById('avatarPreview').src = e.target.result;
+                        }
+                        reader.readAsDataURL(input.files[0]);
+                    }
+                }
+            </script>
+        </div>
+    </div>
+</div>

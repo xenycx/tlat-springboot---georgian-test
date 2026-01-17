@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+                xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>მომხმარებლების ჩამონათვალი</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css">
+    <link rel="stylesheet" th:href="@{/css/dark-theme.css}">
+    <link rel="stylesheet" th:href="@{/css/animations.css}">
+    <style>
+        .user-avatar-sm {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid #6c757d;
+        }
+    </style>
+</head>
+
+<body>
+    <div th:replace="~{common/nav :: nav-bar}"></div>
+    <div class="container py-4 page-content">
+        <div class="d-flex justify-content-between align-items-center mb-4 animate-fade-in-down">
+            <h2 class="fw-bold">
+                <i class="bi bi-people-fill icon-animated"></i> მომხმარებლების ჩამონათვალი
+            </h2>
+            <a href="/add" class="btn btn-primary btn-animated">
+                <i class="bi bi-plus-circle"></i> მომხმარებლის დამატება
+            </a>
+        </div>
+
+        <div th:if="${errorMessage}" class="alert alert-danger alert-animated">
+            <p th:text="${errorMessage}" class="mb-0"></p>
+        </div>
+    
+        <div th:if="${successMessage}" class="alert alert-success alert-animated">
+            <p th:text="${successMessage}" class="mb-0"></p>
+        </div>
+
+        <div class="card card-animated animate-fade-in-up">
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                <table class="table table-striped table-hover mb-0 table-animated">
+                    <thead class="table-dark">
+                        <tr>
+                            <th class="d-none d-lg-table-cell">ID</th>
+                            <th class="d-none d-sm-table-cell">სურათი</th>
+                            <th>სახელი</th>
+                            <th class="d-none d-md-table-cell">მაილი</th>
+                            <th>როლი</th>
+                            <th>მოქმედება</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="user : ${users}">
+                            <td class="d-none d-lg-table-cell" th:text="${user.id}"></td>
+                            <td class="d-none d-sm-table-cell">
+                                <img th:if="${user.avatarPath != null}" 
+                                     th:src="@{'/avatars/' + ${user.avatarPath}}" 
+                                     alt="Avatar" class="user-avatar-sm avatar-animated">
+                                <img th:if="${user.avatarPath == null}" 
+                                     th:src="@{/images/default-avatar.svg}" 
+                                     alt="Avatar" class="user-avatar-sm avatar-animated">
+                            </td>
+                            <td th:text="${user.firstName + ' ' + user.lastName}"></td>
+                            <td class="d-none d-md-table-cell text-truncate" style="max-width: 200px;" th:text="${user.email}"></td>
+                            <td th:text="${user.role}"></td>
+                            <td>
+                                <div class="action-buttons" sec:authorize="hasRole('ROLE_ADMIN')">
+                                    <a th:href="@{/edit/{userId}(userId=${user.id})}" class="btn btn-primary btn-sm btn-animated" title="რედაქტირება">
+                                        <i class="bi bi-pencil"></i><span class="d-none d-lg-inline"> რედაქტირება</span>
+                                    </a>
+                                    <a th:href="@{/delete/{userId}(userId=${user.id})}" class="btn btn-danger btn-sm btn-animated" title="წაშლა">
+                                        <i class="bi bi-trash"></i><span class="d-none d-lg-inline"> წაშლა</span>
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // ანიმაცია ყველა table-ის ველისთვის
+        document.addEventListener('DOMContentLoaded', function() {
+            const tableRows = document.querySelectorAll('.table-animated tbody tr');
+            tableRows.forEach((row, index) => {
+                row.style.animationDelay = (index * 0.05) + 's';
+            });
+        });
+    </script>
+</body>
+</html>
