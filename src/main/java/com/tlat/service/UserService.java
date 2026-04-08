@@ -22,4 +22,6 @@ public interface UserService {
     void deleteUserById(Long userId);
     
     void updateUserAvatar(Long userId, String avatarPath);
+
+    List<UserDto> findUsersByRole(String roleName);
 }

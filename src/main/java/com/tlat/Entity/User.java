@@ -48,6 +48,13 @@ public class User {
     @Column(name = "avatar_path")
     private String avatarPath;
 
+    @Column(name = "can_start_from_anywhere", nullable = false)
+    private boolean canStartFromAnywhere = false;
+
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "group_id")
+    private StudentGroup studentGroup;
+
     @ManyToMany(fetch = FetchType.EAGER, cascade=CascadeType.ALL)
     @JoinTable(
             name="users_roles",

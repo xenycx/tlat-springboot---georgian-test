@@ -15,6 +15,7 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Objects;
 
 @Controller
 public class AvatarController {
@@ -26,7 +27,7 @@ public class AvatarController {
     public ResponseEntity<Resource> getAvatar(@PathVariable String filename) {
         try {
             Path filePath = avatarService.getAvatarPath(filename);
-            Resource resource = new UrlResource(filePath.toUri());
+            Resource resource = new UrlResource(Objects.requireNonNull(filePath.toUri(), "Avatar URI must not be null"));
             
             if (resource.exists() && resource.isReadable()) {
                 // Detect content type

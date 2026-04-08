@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
     <meta charset="UTF-8">
@@ -81,8 +81,8 @@
         }
 
         .navigation-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            display: flex;
+            flex-wrap: wrap;
             gap: 1rem;
             padding: 0;
         }
@@ -95,6 +95,7 @@
             text-decoration: none;
             color: white;
             transition: transform 0.3s ease, background-color 0.3s ease;
+            flex: 1 1 280px;
         }
 
         .nav-card:hover {
@@ -138,11 +139,11 @@
             }
             
             .navigation-grid {
-                grid-template-columns: 1fr;
                 gap: 0.75rem;
             }
             
             .nav-card {
+                flex: 1 1 100%;
                 padding: 1rem;
             }
             
@@ -187,8 +188,8 @@
         }
         
         @media (max-width: 768px) {
-            .navigation-grid {
-                grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            .nav-card {
+                flex: 1 1 200px;
             }
         }
     </style>
@@ -233,10 +234,25 @@
                     <h5>ოთახები</h5>
                     <p>იხილეთ ოთახები</p>
                 </a>
+                <a href="/groups" class="nav-card card-animated nav-card-animated" sec:authorize="hasRole('ADMIN')">
+                    <i class="bi bi-collection-fill" style="font-size: 2rem; margin-bottom: 0.5rem;"></i>
+                    <h5>ჯგუფები</h5>
+                    <p>იხილეთ ჯგუფები</p>
+                </a>
                 <a href="/lectures" class="nav-card card-animated nav-card-animated">
                     <i class="bi bi-book-fill" style="font-size: 2rem; margin-bottom: 0.5rem;"></i>
                     <h5>ლექციები</h5>
                     <p>იხილეთ ლექციები</p>
+                </a>
+                <a href="/resources" class="nav-card card-animated nav-card-animated" sec:authorize="hasAnyRole('ADMIN','LECTURER')">
+                    <i class="bi bi-folder-fill" style="font-size: 2rem; margin-bottom: 0.5rem;"></i>
+                    <h5>რესურსები</h5>
+                    <p>სასწავლო რესურსების მართვა</p>
+                </a>
+                <a href="/materials" class="nav-card card-animated nav-card-animated" sec:authorize="hasRole('STUDENT')">
+                    <i class="bi bi-folder-fill" style="font-size: 2rem; margin-bottom: 0.5rem;"></i>
+                    <h5>სასწავლო მასალები</h5>
+                    <p>იხილეთ სასწავლო რესურსები</p>
                 </a>
             </div>
 

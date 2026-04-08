@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>სასწავლო მასალები</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/remixicon@4.2.0/fonts/remixicon.css">
+    <link rel="stylesheet" th:href="@{/css/dark-theme.css}">
+    <link rel="stylesheet" th:href="@{/css/animations.css}">
+</head>
+<body>
+<div th:replace="~{common/nav :: nav-bar}"></div>
+<div class="container py-4 page-content">
+    <div class="d-flex justify-content-between align-items-center mb-4 animate-fade-in-down">
+        <h2 class="fw-bold"><i class="ri-book-3-line"></i> ჩემი სასწავლო მასალები</h2>
+    </div>
+
+    <div class="card card-animated animate-fade-in-up">
+        <div class="table-responsive">
+            <table class="table table-striped table-hover mb-0 table-animated">
+                <thead class="table-dark">
+                <tr>
+                    <th>სათაური</th>
+                    <th class="d-none d-md-table-cell">ლექცია</th>
+                    <th class="d-none d-md-table-cell">კატეგორია</th>
+                    <th class="d-none d-lg-table-cell">ატვირთვის დრო</th>
+                    <th>ჩამოტვირთვა</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:if="${resources.empty}">
+                    <td colspan="5" class="text-center">ამ ეტაპზე თქვენთვის ფაილები არ არის გამოქვეყნებული</td>
+                </tr>
+                <tr th:each="resource : ${resources}">
+                    <td>
+                        <div class="fw-bold" th:text="${resource.title}"></div>
+                        <div class="small text-muted" th:text="${resource.originalFilename}"></div>
+                    </td>
+                    <td class="d-none d-md-table-cell">
+                        <div th:text="${resource.lecture.subject}"></div>
+                        <div class="small text-muted" th:text="${resource.lecture.lecturer}"></div>
+                    </td>
+                    <td class="d-none d-md-table-cell" th:text="${resource.category}"></td>
+                    <td class="d-none d-lg-table-cell" th:text="${#temporals.format(resource.createdAt, 'yyyy-MM-dd HH:mm')}"></td>
+                    <td>
+                        <a class="btn btn-outline-info btn-sm" th:href="@{/resources/download/{id}(id=${resource.id})}">
+                            <i class="ri-download-2-line"></i> ფაილი
+                        </a>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
+
+

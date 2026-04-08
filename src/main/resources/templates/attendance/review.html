@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="ka" xmlns:th="http://www.thymeleaf.org"
+                xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>დასწრების მიმოხილვა</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css">
+    <link rel="stylesheet" th:href="@{/css/dark-theme.css}">
+    <link rel="stylesheet" th:href="@{/css/animations.css}">
+    <style>
+        .qr-container {
+            background: #ffffff;
+            padding: 1rem;
+            border-radius: 12px;
+            display: inline-block;
+        }
+        .qr-container img {
+            display: block;
+        }
+        .stats-card {
+            background: rgba(187, 134, 252, 0.1);
+            border: 1px solid rgba(187, 134, 252, 0.3);
+            border-radius: 12px;
+            padding: 1.5rem;
+            text-align: center;
+        }
+        .stats-number {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: #bb86fc;
+        }
+        .method-badge {
+            font-size: 0.75rem;
+            padding: 4px 8px;
+        }
+        .verified-badge {
+            background-color: #4caf50;
+        }
+        .unverified-badge {
+            background-color: #ff9800;
+        }
+    </style>
+</head>
+
+<body>
+    <div th:replace="~{common/nav :: nav-bar}"></div>
+    <div class="container py-4 page-content">
+        <div id="alertContainer" class="position-fixed top-0 start-50 translate-middle-x p-3" style="z-index: 1050"></div>
+
+        <div th:if="${errorMessage}" class="alert alert-danger alert-animated">
+            <p th:text="${errorMessage}" class="mb-0"></p>
+        </div>
+        <div th:if="${successMessage}" class="alert alert-success alert-animated">
+            <p th:text="${successMessage}" class="mb-0"></p>
+        </div>
+
+        <!-- Header -->
+        <div class="d-flex justify-content-between align-items-center mb-4 animate-fade-in-down">
+            <div>
+                <h2 class="fw-bold">
+                    <i class="bi bi-clipboard-data icon-animated"></i> დასწრების მიმოხილვა
+                </h2>
+                <p class="text-muted mb-0" th:if="${lecture != null}">
+                    <span th:text="${lecture.subject}"></span> |
+                    ოთახი: <span th:text="${schedule.room.roomNumber}"></span> |
+                    <span th:text="${#temporals.format(schedule.date, 'yyyy-MM-dd')}"></span>
+                    <span th:text="${#temporals.format(schedule.startTime, 'HH:mm')}"></span> - 
+                    <span th:text="${#temporals.format(schedule.endTime, 'HH:mm')}"></span>
+                </p>
+            </div>
+            <a href="/lectures" class="btn btn-outline-secondary btn-animated">
+                <i class="bi bi-arrow-left"></i> ლექციებზე დაბრუნება
+            </a>
+        </div>
+
+        <div class="row g-4">
+            <!-- Left column: QR Code + Stats -->
+            <div class="col-lg-4">
+                <!-- Stats Card -->
+                <div class="stats-card mb-4 animate-fade-in-up">
+                    <div class="stats-number">
+                        <span id="liveCount" th:text="${attendanceCount}"></span> / <span th:text="${totalStudents}"></span>
+                    </div>
+                    <p class="text-muted mb-0">დასწრეს / სულ სტუდენტი</p>
+                </div>
+
+                <!-- QR Code (only when lecture is IN_PROGRESS) -->
+                <div th:if="${schedule != null && #strings.toString(schedule.status) == 'IN_PROGRESS' && schedule.attendanceToken != null}" 
+                     class="card card-animated animate-fade-in-up mb-4">
+                    <div class="card-body text-center">
+                        <h5 class="mb-3"><i class="bi bi-qr-code"></i> QR კოდი</h5>
+                        <div class="qr-container mb-3">
+                            <img th:src="@{/attendance/qr-image/{id}(id=${schedule.id})}" 
+                                 alt="QR Code" width="250" height="250">
+                        </div>
+                        <p class="text-muted small mb-3">სტუდენტებმა უნდა დაასკანერონ ეს QR კოდი</p>
+                        
+                        <form th:action="@{/attendance/regenerate/{id}(id=${schedule.id})}" method="post" class="mb-2">
+                            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+                            <button type="submit" class="btn btn-outline-warning btn-sm btn-animated">
+                                <i class="bi bi-arrow-clockwise"></i> QR კოდის განახლება
+                            </button>
+                        </form>
+                    </div>
+                </div>
+
+                <div th:if="${schedule != null && #strings.toString(schedule.status) != 'IN_PROGRESS'}" 
+                     class="card card-animated animate-fade-in-up mb-4">
+                    <div class="card-body text-center">
+                        <i class="bi bi-qr-code" style="font-size: 2rem; color: #666;"></i>
+                        <p class="text-muted mt-2 mb-0">QR კოდი ხელმისაწვდომია მხოლოდ მიმდინარე ლექციისთვის</p>
+                    </div>
+                </div>
+
+                <!-- Manual Add Card -->
+                <div class="card card-animated animate-fade-in-up">
+                    <div class="card-body">
+                        <h5 class="mb-3"><i class="bi bi-person-plus"></i> ხელით დამატება</h5>
+                        <form th:action="@{/attendance/manual/{id}(id=${schedule.id})}" method="post">
+                            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+                            <div class="mb-3">
+                                <select class="form-select" name="studentId" required>
+                                    <option value="" disabled selected>აირჩიეთ სტუდენტი...</option>
+                                    <option th:each="student : ${eligibleStudents}"
+                                            th:value="${student.id}"
+                                            th:text="${student.name + ' (' + (student.studentGroup != null ? student.studentGroup.code : '-') + ')'}">
+                                    </option>
+                                </select>
+                            </div>
+                            <button type="submit" class="btn btn-primary w-100 btn-animated">
+                                <i class="bi bi-plus-circle"></i> დამატება
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right column: Attendance Table -->
+            <div class="col-lg-8">
+                <div class="card card-animated animate-fade-in-up">
+                    <div class="card-body p-0">
+                        <div class="table-responsive">
+                            <table class="table table-striped table-hover mb-0 table-animated">
+                                <thead class="table-dark">
+                                    <tr>
+                                        <th>#</th>
+                                        <th>სტუდენტი</th>
+                                        <th>ჯგუფი</th>
+                                        <th>დრო</th>
+                                        <th>მეთოდი</th>
+                                        <th>სტატუსი</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr th:each="record, iter : ${records}">
+                                        <td th:text="${iter.count}"></td>
+                                        <td th:text="${record.student.name}"></td>
+                                        <td th:text="${record.student.studentGroup != null ? record.student.studentGroup.code : '-'}"></td>
+                                        <td th:text="${#temporals.format(record.attendedAt, 'HH:mm:ss')}"></td>
+                                        <td>
+                                            <span th:if="${#strings.toString(record.captureMethod) == 'QR_AUTHENTICATED'}" 
+                                                  class="badge bg-success method-badge">
+                                                <i class="bi bi-qr-code-scan"></i> QR (ავტორიზებული)
+                                            </span>
+                                            <span th:if="${#strings.toString(record.captureMethod) == 'QR_SELF_IDENTIFIED'}" 
+                                                  class="badge bg-warning text-dark method-badge">
+                                                <i class="bi bi-qr-code-scan"></i> QR (თვითიდენტიფიკაცია)
+                                            </span>
+                                            <span th:if="${#strings.toString(record.captureMethod) == 'MANUAL'}" 
+                                                  class="badge bg-info method-badge">
+                                                <i class="bi bi-pencil"></i> ხელით
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <span th:if="${record.verified}" class="badge verified-badge">
+                                                <i class="bi bi-check-circle"></i> დადასტურებული
+                                            </span>
+                                            <span th:if="${!record.verified}" class="badge unverified-badge">
+                                                <i class="bi bi-exclamation-triangle"></i> დაუდასტურებელი
+                                            </span>
+                                        </td>
+                                    </tr>
+                                    <tr th:if="${#lists.isEmpty(records)}">
+                                        <td colspan="6" class="text-center text-muted py-4">
+                                            <i class="bi bi-inbox" style="font-size: 2rem;"></i>
+                                            <p class="mt-2">ჯერ არავის აღუნიშნავს დასწრება</p>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script th:inline="javascript">
+        // Auto-refresh attendance count every 10 seconds when lecture is in progress
+        const scheduleId = [[${schedule.id}]];
+        const isInProgress = [[${#strings.toString(schedule.status) == 'IN_PROGRESS'}]];
+        
+        if (isInProgress) {
+            setInterval(async function() {
+                try {
+                    const response = await fetch('/attendance/count/' + scheduleId);
+                    if (response.ok) {
+                        const count = await response.text();
+                        document.getElementById('liveCount').textContent = count;
+                    }
+                } catch (e) {
+                    // ignore
+                }
+            }, 10000);
+        }
+    </script>
+</body>
+</html>

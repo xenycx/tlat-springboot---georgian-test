@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <title>ჯგუფის რედაქტირება</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/dark-theme.css}">
+    <link rel="stylesheet" th:href="@{/css/animations.css}">
+</head>
+
+<body>
+<div th:replace="~{common/nav :: nav-bar}"></div>
+<div class="container page-content">
+    <div class="row">
+        <div class="col-md-6 offset-md-3">
+            <h2 class="text-center animate-fade-in-down">ჯგუფის რედაქტირება</h2>
+            <form th:action="@{/groups/edit/{id}(id=${group.id})}" th:object="${group}" method="post" class="animate-fade-in-up">
+                <div class="form-group mb-3">
+                    <label for="code">ჯგუფის კოდი</label>
+                    <input type="text" id="code" name="code" th:field="*{code}" class="form-control form-control-animated" required>
+                    <p th:if="${#fields.hasErrors('code')}" th:errors="*{code}" class="text-danger"></p>
+                </div>
+                <div class="form-group mt-3">
+                    <button type="submit" class="btn btn-primary btn-animated">განახლება</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

@@ -24,6 +24,10 @@ public class UserDto
     private Long id;
     
     private String avatarPath;
+
+    private Long groupId;
+
+    private String groupCode;
     
     private transient MultipartFile avatarFile;
 

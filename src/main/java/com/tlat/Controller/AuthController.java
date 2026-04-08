@@ -3,6 +3,7 @@ package com.tlat.Controller;
 import com.tlat.Dto.UserDto;
 import com.tlat.Entity.User;
 import com.tlat.service.AvatarService;
+import com.tlat.service.StudentGroupService;
 import com.tlat.service.UserService;
 
 import jakarta.validation.Valid;
@@ -38,10 +39,22 @@ public class AuthController {
 	@Autowired
 	private AvatarService avatarService;
 
+	@Autowired
+	private StudentGroupService studentGroupService;
+
 	// კონსტრუქტორი ინექციით
-	public AuthController(UserService userService, AvatarService avatarService) {
+	public AuthController(UserService userService, AvatarService avatarService, StudentGroupService studentGroupService) {
 		this.userService = userService;
 		this.avatarService = avatarService;
+		this.studentGroupService = studentGroupService;
+	}
+
+	@ModelAttribute("currentUser")
+	public User currentUser(Principal principal) {
+		if (principal == null) {
+			return null;
+		}
+		return userService.findUserByEmail(principal.getName());
 	}
 
 	@GetMapping("/")
@@ -145,12 +158,24 @@ public class AuthController {
 			result.rejectValue("password", "field.min.length", "Password should not be empty.");
 		}
 
+		if (isStudentRole(userDto) && userDto.getGroupId() == null) {
+			result.rejectValue("groupId", "", "სტუდენტისთვის ჯგუფის არჩევა სავალდებულოა");
+		}
+
 		if (result.hasErrors()) {
 			model.addAttribute("user", userDto);
+			model.addAttribute("groups", studentGroupService.findAllGroups());
 			return "add";
 		}
 
-		userService.saveUser(userDto);
+		try {
+			userService.saveUser(userDto);
+		} catch (IllegalArgumentException e) {
+			result.rejectValue("groupId", "", "სტუდენტისთვის ჯგუფის არჩევა სავალდებულოა");
+			model.addAttribute("user", userDto);
+			model.addAttribute("groups", studentGroupService.findAllGroups());
+			return "add";
+		}
 
 		// ავატარის ატვირთვა დამატებისთანავე
 		if (avatarFile != null && !avatarFile.isEmpty()) {
@@ -172,6 +197,7 @@ public class AuthController {
 	public String showUserAddForm(Model model) {
 		UserDto user = new UserDto();
 		model.addAttribute("user", user);
+		model.addAttribute("groups", studentGroupService.findAllGroups());
 		return "add";
 	}
 
@@ -192,6 +218,7 @@ public class AuthController {
 			Model model) {
 		UserDto user = userService.findUserById(id);
 		model.addAttribute("user", user);
+		model.addAttribute("groups", studentGroupService.findAllGroups());
 		return "edit";
 	}
 
@@ -211,8 +238,13 @@ public class AuthController {
 			}
 		}
 
+		if (isStudentRole(updatedUserDto) && updatedUserDto.getGroupId() == null) {
+			result.rejectValue("groupId", "", "სტუდენტისთვის ჯგუფის არჩევა სავალდებულოა");
+		}
+
 		if (result.hasErrors()) {
 			model.addAttribute("user", updatedUserDto);
+			model.addAttribute("groups", studentGroupService.findAllGroups());
 			return "edit";
 		}
 
@@ -232,7 +264,14 @@ public class AuthController {
 			}
 		}
 
-		userService.editUser(updatedUserDto, id);
+		try {
+			userService.editUser(updatedUserDto, id);
+		} catch (IllegalArgumentException e) {
+			result.rejectValue("groupId", "", "სტუდენტისთვის ჯგუფის არჩევა სავალდებულოა");
+			model.addAttribute("user", updatedUserDto);
+			model.addAttribute("groups", studentGroupService.findAllGroups());
+			return "edit";
+		}
 		return "redirect:/users";
 	}
 
@@ -269,6 +308,10 @@ public class AuthController {
 			}
 		}
 		return "redirect:/users";
+	}
+
+	private boolean isStudentRole(UserDto userDto) {
+		return "ROLE_STUDENT".equals(userDto.getRole());
 	}
 
 }

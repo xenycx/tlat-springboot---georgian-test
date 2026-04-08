@@ -96,10 +96,10 @@
                                         </a>
                                     </div>
                                     
-                                    <!-- მომხმარებლის მოქმედებები -->
-                                    <div sec:authorize="hasRole('USER')" class="btn-group-responsive">
+                                    <!-- ლექტორის/ადმინის მოქმედებები -->
+                                    <div sec:authorize="hasAnyRole('ADMIN','LECTURER')" class="btn-group-responsive">
                                         <form th:if="${lecture != null && #strings.toString(lecture.status) == 'SCHEDULED'}" 
-                                              th:action="@{/lectures/start/{id}(id=${lecture.id})}" 
+                                              th:action="@{/lectures/start/{id}(id=${lecture.scheduleId})}" 
                                               method="post" style="display: inline;">
                                             <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
                                             <button type="submit" class="btn btn-success btn-sm btn-animated" title="დაწყება">
@@ -108,13 +108,27 @@
                                         </form>
                                         
                                         <form th:if="${lecture != null && #strings.toString(lecture.status) == 'IN_PROGRESS'}" 
-                                              th:action="@{/lectures/stop/{id}(id=${lecture.id})}" 
+                                              th:action="@{/lectures/stop/{id}(id=${lecture.scheduleId})}" 
                                               method="post" style="display: inline;">
                                             <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
                                             <button type="submit" class="btn btn-warning btn-sm btn-animated" title="Stop">
                                                 <i class="bi bi-stop-fill"></i><span class="d-none d-xl-inline"> Stop</span>
                                             </button>
                                         </form>
+
+                                        <!-- Attendance button for IN_PROGRESS lectures -->
+                                        <a th:if="${lecture != null && #strings.toString(lecture.status) == 'IN_PROGRESS' && lecture.scheduleId != null}" 
+                                           th:href="@{/attendance/review/{id}(id=${lecture.scheduleId})}" 
+                                           class="btn btn-info btn-sm btn-animated" title="დასწრება">
+                                            <i class="bi bi-clipboard-check"></i><span class="d-none d-xl-inline"> დასწრება</span>
+                                        </a>
+                                        
+                                        <!-- Attendance review for completed lectures -->
+                                        <a th:if="${lecture != null && #strings.toString(lecture.status) == 'COMPLETED' && lecture.scheduleId != null}" 
+                                           th:href="@{/attendance/review/{id}(id=${lecture.scheduleId})}" 
+                                           class="btn btn-outline-info btn-sm btn-animated" title="დასწრება">
+                                            <i class="bi bi-clipboard-data"></i><span class="d-none d-xl-inline"> დასწრება</span>
+                                        </a>
                                     </div>
                                 </div>
                             </td>

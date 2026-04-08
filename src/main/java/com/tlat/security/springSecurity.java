@@ -14,7 +14,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
 import org.springframework.security.web.csrf.CsrfTokenRequestAttributeHandler;
-import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
 @Configuration
 @EnableWebSecurity
@@ -42,23 +41,40 @@ public class springSecurity {
                 // საჯარო 
                 .requestMatchers("/register/**", "/forgot/**", "/index", "/").permitAll()
                 
-                // (ADMIN და USER)
-                .requestMatchers("/main").hasAnyRole("ADMIN", "USER")
-                .requestMatchers("/lectures").hasAnyRole("ADMIN", "USER")
-                .requestMatchers("/rooms").hasAnyRole("ADMIN", "USER")
+                // (ADMIN, LECTURER, STUDENT)
+                .requestMatchers("/main").hasAnyRole("ADMIN", "LECTURER", "STUDENT")
+                .requestMatchers("/lectures").hasAnyRole("ADMIN", "LECTURER", "STUDENT")
+                .requestMatchers("/lectures/export/**").hasAnyRole("ADMIN", "LECTURER", "STUDENT")
+                .requestMatchers("/resources/download/**").hasAnyRole("ADMIN", "LECTURER", "STUDENT")
+                .requestMatchers("/materials/**").hasRole("STUDENT")
+                .requestMatchers("/resources/**").hasAnyRole("ADMIN", "LECTURER")
+                .requestMatchers("/rooms").hasAnyRole("ADMIN", "LECTURER")
+                .requestMatchers("/rooms/ip", "/rooms/find-by-ip").permitAll()
+                .requestMatchers("/lectures/start/**").hasAnyRole("ADMIN", "LECTURER")
+                .requestMatchers("/lectures/stop/**").hasAnyRole("ADMIN", "LECTURER")
+                
+                // დასწრების სისტემა
+                .requestMatchers("/attendance/checkin/**").permitAll()
+                .requestMatchers("/attendance/qr-image/**").permitAll()
+                .requestMatchers("/attendance/count/**").permitAll()
+                .requestMatchers("/attendance/review/**").hasAnyRole("ADMIN", "LECTURER")
+                .requestMatchers("/attendance/manual/**").hasAnyRole("ADMIN", "LECTURER")
+                .requestMatchers("/attendance/regenerate/**").hasAnyRole("ADMIN", "LECTURER")
                 
                 // მხოლოდ ADMIN-ისთვის
+                .requestMatchers("/admin/**").hasRole("ADMIN")
                 .requestMatchers("/users/**").hasRole("ADMIN")
+                .requestMatchers("/groups/**").hasRole("ADMIN")
                 .requestMatchers("/add/**").hasRole("ADMIN")
                 .requestMatchers("/edit/**").hasRole("ADMIN")
                 .requestMatchers("/delete/**").hasRole("ADMIN")
                 .requestMatchers("/rooms/add/**").hasRole("ADMIN")
                 .requestMatchers("/rooms/edit/**").hasRole("ADMIN") 
                 .requestMatchers("/rooms/delete/**").hasRole("ADMIN")
-                .requestMatchers("/lectures/add/**").hasRole("ADMIN")
-                .requestMatchers("/lectures/edit/**").hasRole("ADMIN")
-                .requestMatchers("/lectures/delete/**").hasRole("ADMIN")
-                .requestMatchers("/lectures/import/**").hasRole("ADMIN")
+                .requestMatchers("/lectures/add/**").hasAnyRole("ADMIN", "LECTURER")
+                .requestMatchers("/lectures/edit/**").hasAnyRole("ADMIN", "LECTURER")
+                .requestMatchers("/lectures/delete/**").hasAnyRole("ADMIN", "LECTURER")
+                .requestMatchers("/lectures/import/**").hasAnyRole("ADMIN", "LECTURER")
                 
                 .anyRequest().authenticated()
             )
@@ -72,7 +88,7 @@ public class springSecurity {
             // ლოგაუთის კონფიგურაცია
             .logout(
                 logout -> logout
-                    .logoutRequestMatcher(new AntPathRequestMatcher("/logout"))
+                    .logoutUrl("/logout")
                     .logoutSuccessUrl("/login?logout")
                     .invalidateHttpSession(true)
                     .deleteCookies("JSESSIONID")

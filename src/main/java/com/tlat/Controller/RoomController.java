@@ -2,8 +2,10 @@ package com.tlat.Controller;
 
 import com.tlat.Dto.RoomDto;
 import com.tlat.Entity.Room;
+import com.tlat.Entity.User;
 import com.tlat.service.RoomService;
 import com.tlat.Repository.RoomRepository;
+import com.tlat.service.UserService;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
@@ -17,17 +19,30 @@ import org.springframework.web.bind.annotation.*;
 
 
 import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
+import java.security.Principal;
 
 @Controller
 @RequestMapping("/rooms")
 public class RoomController {
 
-    private RoomService roomService;
-    private RoomRepository roomRepository;
+    private final RoomService roomService;
+    private final RoomRepository roomRepository;
+    private final UserService userService;
 
-    public RoomController(RoomService roomService, RoomRepository roomRepository) {
+    public RoomController(RoomService roomService, RoomRepository roomRepository, UserService userService) {
         this.roomService = roomService;
         this.roomRepository = roomRepository;
+        this.userService = userService;
+    }
+
+    @ModelAttribute("currentUser")
+    public User currentUser(Principal principal) {
+        if (principal == null) {
+            return null;
+        }
+        return userService.findUserByEmail(principal.getName());
     }
 
     @GetMapping
@@ -74,7 +89,8 @@ public class RoomController {
         try {
             roomService.editRoom(roomDto, id);
         } catch (IllegalArgumentException e) {
-            result.rejectValue("ipAddress", "error.room", e.getMessage());
+            String errorMessage = Optional.ofNullable(e.getMessage()).orElse("IP მისამართის დამუშავებისას დაფიქსირდა შეცდომა");
+            result.rejectValue("ipAddress", "error.room", Objects.requireNonNull(errorMessage, "Error message must not be null"));
             model.addAttribute("room", roomDto);
             return "room/edit";
         }

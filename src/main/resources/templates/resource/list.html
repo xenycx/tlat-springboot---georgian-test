@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>რესურსების მართვა</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/remixicon@4.2.0/fonts/remixicon.css">
+    <link rel="stylesheet" th:href="@{/css/dark-theme.css}">
+    <link rel="stylesheet" th:href="@{/css/animations.css}">
+</head>
+<body>
+<div th:replace="~{common/nav :: nav-bar}"></div>
+<div class="container py-4 page-content">
+    <div class="d-flex justify-content-between align-items-center mb-4 animate-fade-in-down">
+        <h2 class="fw-bold"><i class="ri-folder-open-line"></i> რესურსები</h2>
+        <div class="d-flex gap-2">
+            <a class="btn btn-outline-info btn-animated" sec:authorize="hasRole('ADMIN')" href="/resources/audit">
+                <i class="ri-history-line"></i> აუდიტი
+            </a>
+            <a class="btn btn-primary btn-animated" href="/resources/add">
+                <i class="ri-add-circle-line"></i> ახალი ფაილი
+            </a>
+        </div>
+    </div>
+
+    <div th:if="${errorMessage}" class="alert alert-danger alert-animated" th:text="${errorMessage}"></div>
+    <div th:if="${successMessage}" class="alert alert-success alert-animated" th:text="${successMessage}"></div>
+
+    <!-- Bulk action bar (hidden by default) -->
+    <div id="bulkBar" class="alert alert-dark d-flex align-items-center justify-content-between mb-3 animate-fade-in-down" style="display: none !important;">
+        <span><strong id="selectedCount">0</strong> ფაილი მონიშნულია</span>
+        <button type="button" class="btn btn-danger btn-sm" onclick="bulkDelete()">
+            <i class="ri-delete-bin-line"></i> მონიშნულის წაშლა
+        </button>
+    </div>
+
+    <form id="bulkDeleteForm" th:action="@{/resources/delete-selected}" method="post" style="display:none;">
+        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+        <div id="bulkIdsContainer"></div>
+    </form>
+
+    <div class="card card-animated animate-fade-in-up">
+        <div class="table-responsive">
+            <table class="table table-striped table-hover mb-0 table-animated">
+                <thead class="table-dark">
+                <tr>
+                    <th style="width: 40px;">
+                        <input type="checkbox" class="form-check-input" id="selectAll" onclick="toggleAll(this)">
+                    </th>
+                    <th>სათაური</th>
+                    <th class="d-none d-md-table-cell">ლექცია</th>
+                    <th class="d-none d-lg-table-cell">ფაილი</th>
+                    <th>სტატუსი</th>
+                    <th>მოქმედება</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:if="${resources.empty}">
+                    <td colspan="6" class="text-center">რესურსები ჯერ არ არის დამატებული</td>
+                </tr>
+                <tr th:each="resource : ${resources}">
+                    <td>
+                        <input type="checkbox" class="form-check-input row-check" th:value="${resource.id}" onclick="updateBulkBar()">
+                    </td>
+                    <td>
+                        <div class="fw-bold" th:text="${resource.title}"></div>
+                        <div class="small text-muted" th:text="${resource.description}"></div>
+                    </td>
+                    <td class="d-none d-md-table-cell">
+                        <div th:text="${resource.lecture.subject}"></div>
+                        <div class="small text-muted" th:text="${resource.lecture.lecturer}"></div>
+                    </td>
+                    <td class="d-none d-lg-table-cell">
+                        <span th:text="${resource.originalFilename}"></span>
+                        <div class="small text-muted" th:text="${#numbers.formatDecimal(resource.fileSize / 1048576.0, 0, 2) + ' MB'}"></div>
+                    </td>
+                    <td>
+                        <span class="badge" th:classappend="${resource.publishStatus.name() == 'PUBLISHED' ? 'bg-success' : 'bg-warning text-dark'}" th:text="${resource.publishStatus.name() == 'PUBLISHED' ? 'გამოქვეყნებული' : 'დრაფტი'}"></span>
+                    </td>
+                    <td>
+                        <div class="d-flex gap-1">
+                            <a class="btn btn-outline-primary btn-sm" th:href="@{/resources/edit/{id}(id=${resource.id})}" title="რედაქტირება"><i class="ri-pencil-line"></i></a>
+                            <a class="btn btn-outline-info btn-sm" th:href="@{/resources/download/{id}(id=${resource.id})}" title="ჩამოტვირთვა"><i class="ri-download-2-line"></i></a>
+
+                            <form th:if="${resource.publishStatus.name() == 'DRAFT'}" th:action="@{/resources/publish/{id}(id=${resource.id})}" method="post" class="m-0">
+                                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                                <button class="btn btn-outline-success btn-sm" type="submit" title="გამოქვეყნება"><i class="ri-eye-line"></i></button>
+                            </form>
+
+                            <form th:if="${resource.publishStatus.name() == 'PUBLISHED'}" th:action="@{/resources/unpublish/{id}(id=${resource.id})}" method="post" class="m-0">
+                                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                                <button class="btn btn-outline-warning btn-sm" type="submit" title="დამალვა"><i class="ri-eye-off-line"></i></button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    function toggleAll(master) {
+        document.querySelectorAll('.row-check').forEach(function(cb) {
+            cb.checked = master.checked;
+        });
+        updateBulkBar();
+    }
+
+    function updateBulkBar() {
+        var checked = document.querySelectorAll('.row-check:checked');
+        var bar = document.getElementById('bulkBar');
+        var count = document.getElementById('selectedCount');
+        count.textContent = checked.length;
+        bar.style.display = checked.length > 0 ? 'flex' : 'none';
+
+        var allBoxes = document.querySelectorAll('.row-check');
+        document.getElementById('selectAll').checked = allBoxes.length > 0 && checked.length === allBoxes.length;
+    }
+
+    function bulkDelete() {
+        var checked = document.querySelectorAll('.row-check:checked');
+        if (checked.length === 0) return;
+        if (!confirm('დარწმუნებული ხართ, რომ გსურთ ' + checked.length + ' ფაილის წაშლა?')) return;
+
+        var container = document.getElementById('bulkIdsContainer');
+        container.innerHTML = '';
+        checked.forEach(function(cb) {
+            var input = document.createElement('input');
+            input.type = 'hidden';
+            input.name = 'ids';
+            input.value = cb.value;
+            container.appendChild(input);
+        });
+        document.getElementById('bulkDeleteForm').submit();
+    }
+</script>
+</body>
+</html>
+
+
+

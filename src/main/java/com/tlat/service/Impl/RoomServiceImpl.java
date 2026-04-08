@@ -10,6 +10,7 @@ import com.tlat.service.RoomService;
 import jakarta.persistence.EntityNotFoundException;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -40,7 +41,8 @@ public class RoomServiceImpl implements RoomService {
 
     @Override
     public RoomDto findRoomById(Long roomId) {
-        Optional<Room> roomOptional = roomRepository.findById(roomId);
+        Long nonNullRoomId = Objects.requireNonNull(roomId, "roomId is required");
+        Optional<Room> roomOptional = roomRepository.findById(nonNullRoomId);
         if(roomOptional.isPresent()){
             return mapToRoomDto(roomOptional.get());
         }
@@ -49,12 +51,13 @@ public class RoomServiceImpl implements RoomService {
 
     @Override
     public void editRoom(RoomDto updatedRoomDto, Long roomId) {
-        Room existingRoom = roomRepository.findById(roomId)
+        Long nonNullRoomId = Objects.requireNonNull(roomId, "roomId is required");
+        Room existingRoom = roomRepository.findById(nonNullRoomId)
                 .orElseThrow(() -> new EntityNotFoundException("ოთახი ვერ მოიძებნა"));
 
         // შეამოწმეთ IP მისამართის დუბლირება
         Room roomWithSameIp = roomRepository.findByIpAddress(updatedRoomDto.getIpAddress());
-        if (roomWithSameIp != null && !roomWithSameIp.getId().equals(roomId)) {
+        if (roomWithSameIp != null && !roomWithSameIp.getId().equals(nonNullRoomId)) {
             throw new IllegalArgumentException("IP მისამართი უკვე არსებობს სხვა ოთახისთვის.");
         }
 
@@ -65,7 +68,7 @@ public class RoomServiceImpl implements RoomService {
 
     @Override
     public void deleteRoomById(Long roomId) {
-        roomRepository.deleteById(roomId);
+        roomRepository.deleteById(Objects.requireNonNull(roomId, "roomId is required"));
     }
 
     private RoomDto mapToRoomDto(Room room){

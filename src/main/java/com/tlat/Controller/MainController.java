@@ -10,6 +10,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import java.security.Principal;
+import java.util.ArrayList;
 import java.time.LocalDate;
 import java.util.List;
 
@@ -37,17 +38,31 @@ public class MainController {
         User user = userService.findUserByEmail(principal.getName());
         model.addAttribute("user", user);
 
-        // მოიპოვეთ დღევანდელი ლექციები ავტორიზებული მომხმარებლისთვის
         List<LectureDto> todaysLectures;
-        if (user.getRoles().stream().anyMatch(role -> role.getName().equals("ROLE_ADMIN"))) {
-            // ადმინი ხედავს ყველა ლექციას
+        List<LectureDto> upcomingLectures = new ArrayList<>();
+        boolean isStudent = hasRole(user, "ROLE_STUDENT");
+
+        if (hasRole(user, "ROLE_ADMIN")) {
             todaysLectures = lectureService.findLecturesByDate(LocalDate.now());
+        } else if (isStudent) {
+            if (user.getStudentGroup() == null) {
+                todaysLectures = new ArrayList<>();
+            } else {
+                Long groupId = user.getStudentGroup().getId();
+                todaysLectures = lectureService.findLecturesByDateAndGroupId(LocalDate.now(), groupId);
+                upcomingLectures = lectureService.findUpcomingLecturesByGroupId(groupId, LocalDate.now());
+            }
         } else {
-            // ჩვეულებრივი მომხმარებლები ხედავენ მხოლოდ საკუთარ ლექციებს
-            todaysLectures = lectureService.findLecturesByDateAndLecturer(LocalDate.now(), user.getName());
+            todaysLectures = lectureService.findLecturesByDateAndLecturerId(LocalDate.now(), user.getId());
         }
         model.addAttribute("todaysLectures", todaysLectures);
-        
+        model.addAttribute("upcomingLectures", upcomingLectures);
+        model.addAttribute("isStudent", isStudent);
+
         return "main";
+    }
+
+    private boolean hasRole(User user, String roleName) {
+        return user.getRoles().stream().anyMatch(role -> role.getName().equals(roleName));
     }
 }

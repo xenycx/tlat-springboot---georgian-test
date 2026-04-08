@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>რესურსების აუდიტი</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/remixicon@4.2.0/fonts/remixicon.css">
+    <link rel="stylesheet" th:href="@{/css/dark-theme.css}">
+    <link rel="stylesheet" th:href="@{/css/animations.css}">
+</head>
+<body>
+<div th:replace="~{common/nav :: nav-bar}"></div>
+<div class="container py-4 page-content">
+    <div class="d-flex justify-content-between align-items-center mb-4 animate-fade-in-down">
+        <h2 class="fw-bold"><i class="ri-history-line"></i> რესურსების აუდიტის ჟურნალი</h2>
+        <a href="/resources" class="btn btn-secondary btn-animated">უკან</a>
+    </div>
+
+    <div class="card card-animated animate-fade-in-up">
+        <div class="table-responsive">
+            <table class="table table-striped table-hover mb-0 table-animated">
+                <thead class="table-dark">
+                <tr>
+                    <th>თარიღი</th>
+                    <th>ქმედება</th>
+                    <th class="d-none d-md-table-cell">მომხმარებელი</th>
+                    <th class="d-none d-lg-table-cell">რესურსი</th>
+                    <th>დეტალები</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:if="${logs.empty}">
+                    <td colspan="5" class="text-center">ლოგები არ მოიძებნა</td>
+                </tr>
+                <tr th:each="log : ${logs}">
+                    <td th:text="${#temporals.format(log.createdAt, 'yyyy-MM-dd HH:mm:ss')}"></td>
+                    <td th:text="${log.action}"></td>
+                    <td class="d-none d-md-table-cell" th:text="${log.actor != null ? log.actor.name : '-'}"></td>
+                    <td class="d-none d-lg-table-cell" th:text="${log.resourceTitle + ' (' + log.resourceFilename + ')'}"></td>
+                    <td th:text="${log.details}"></td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
+
+

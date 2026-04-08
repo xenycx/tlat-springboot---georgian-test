@@ -6,6 +6,9 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+
+import java.util.ArrayList;
+import java.util.List;
 import java.time.LocalDate;
 import java.time.LocalTime;
 
@@ -17,6 +20,10 @@ import com.tlat.Entity.LectureStatus;
 @AllArgsConstructor
 public class LectureDto {
     private Long id;
+
+    private Long lectureId;
+
+    private Long scheduleId;
     
     @NotBlank(message = "Room number is required")
     private String roomNumber;
@@ -30,14 +37,23 @@ public class LectureDto {
     @NotNull(message = "End time is required")
     private LocalTime endTime;
     
-    @NotBlank(message = "Lecturer name is required")
     private String lecturer;
+
+    private List<Long> lecturerIds = new ArrayList<>();
+
+    private List<String> lecturerNames = new ArrayList<>();
     
     @NotBlank(message = "Subject is required")
     private String subject;
 
     @NotNull(message = "Status is required")
     private LectureStatus status = LectureStatus.SCHEDULED;
+
+    private List<Long> groupIds = new ArrayList<>();
+
+    private List<String> groupCodes = new ArrayList<>();
+
+    private Integer scheduleCount = 0;
 
     public LectureStatus getStatus() {
         return status != null ? status : LectureStatus.SCHEDULED;
