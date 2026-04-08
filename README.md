@@ -15,6 +15,36 @@
 
 > სანამ გაუშვებთ ჩახედეთ `pom.xml` ფაილს და მიხვდებით როგორ გაუშვათ. Java-ს 17 ვერსიაზეა აწყობილი ამიტომ Intelij-ით შეიძლება გაგიჭირდეთ გაშვება თუ 21 JDK გიყენიათ
 
+## აპლიკაციის გაშვება / How to Run
+
+### Linux / macOS
+**Arch Linux-ისთვის (For Arch Linux):**
+ჯერ უნდა დააყენოთ Java 17 (First install Java 17):
+```bash
+sudo pacman -S jre17-openjdk jdk17-openjdk
+```
+თუ `JAVA_HOME` ავტომატურად არ არის მითითებული, დააყენეთ შემდეგნაირად (Set `JAVA_HOME` if needed):
+```bash
+export JAVA_HOME=/usr/lib/jvm/default
+```
+
+ტერმინალში გაუშვით შემდეგი ბრძანება (Run the following command in terminal):
+```bash
+# მიეცით გაშვების უფლება სკრიპტს (Give execute permissions to script)
+chmod +x mvnw
+# გაუშვით აპლიკაცია (Run the application)
+./mvnw spring-boot:run
+```
+
+### Windows
+**Java 17-ის დაყენება (Install Java 17):**
+გადმოწერეთ და დააყენეთ Java 17 [Adoptium (Eclipse Temurin)](https://adoptium.net/temurin/releases/?version=17) ვებ-გვერდიდან.
+
+გახსენით Command Prompt ან PowerShell და გაუშვით (Open Command Prompt or PowerShell and run):
+```cmd
+mvnw.cmd spring-boot:run
+```
+
 ## ფოტოები / დემონსტრაცია
 
 | ფოტო | აღწერა |
