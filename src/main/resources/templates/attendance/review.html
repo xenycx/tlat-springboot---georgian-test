@@ -71,9 +71,14 @@
                     <span th:text="${#temporals.format(schedule.endTime, 'HH:mm')}"></span>
                 </p>
             </div>
-            <a href="/lectures" class="btn btn-outline-secondary btn-animated">
-                <i class="bi bi-arrow-left"></i> ლექციებზე დაბრუნება
-            </a>
+            <div>
+                <a sec:authorize="hasAnyRole('ADMIN', 'LECTURER')" th:href="@{/grading/attendance/{id}(id=${schedule.id})}" class="btn btn-primary btn-animated me-2">
+                    <i class="bi bi-star"></i> შეფასება
+                </a>
+                <a href="/lectures" class="btn btn-outline-secondary btn-animated">
+                    <i class="bi bi-arrow-left"></i> ლექციებზე დაბრუნება
+                </a>
+            </div>
         </div>
 
         <div class="row g-4">

@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="ka" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ნიშნების უწყისის არჩევა</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css">
+    <link rel="stylesheet" th:href="@{/css/dark-theme.css}">
+    <link rel="stylesheet" th:href="@{/css/animations.css}">
+</head>
+<body>
+<div th:replace="~{common/nav :: nav-bar}"></div>
+
+<div class="container py-4 page-content">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="d-flex justify-content-between align-items-center mb-4 animate-fade-in-down">
+                <h2 class="fw-bold">
+                    <i class="bi bi-file-earmark-spreadsheet icon-animated"></i> ნიშნების უწყისი
+                </h2>
+            </div>
+
+            <div class="card card-animated animate-fade-in-up">
+                <div class="card-body">
+                    <form th:action="@{/grading/ledger/view}" method="get">
+                        <div class="mb-3">
+                            <label for="subject" class="form-label">საგანი</label>
+                            <input type="text" id="subject" name="subject" class="form-control" required placeholder="შეიყვანეთ საგნის სახელი..." />
+                        </div>
+                        
+                        <div class="mb-4">
+                            <label for="groupId" class="form-label">ჯგუფი</label>
+                            <select id="groupId" name="groupId" class="form-select" required>
+                                <option value="" disabled selected>აირჩიეთ ჯგუფი...</option>
+                                <option th:each="group : ${groups}"
+                                        th:value="${group.id}"
+                                        th:text="${group.code}">
+                                </option>
+                            </select>
+                        </div>
+                        
+                        <button type="submit" class="btn btn-primary w-100 btn-animated">
+                            <i class="bi bi-search"></i> უწყისის ნახვა
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

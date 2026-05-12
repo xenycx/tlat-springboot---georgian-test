@@ -61,7 +61,7 @@
             content: '';
             width: 18px;
             height: 18px;
-            border-radius: 999px;
+            border-radius: 4px;
             border: 2px solid rgba(255, 255, 255, 0.3);
             background-color: transparent;
             flex-shrink: 0;
@@ -162,9 +162,10 @@
                                         <div th:each="user : ${users}" class="selection-item" data-filter-item="lecturer-selection" th:attr="data-filter-value=${user.name}">
                                             <input class="selection-input"
                                                type="checkbox"
-                                               th:field="*{lecturerIds}"
+                                               name="lecturerIds"
                                                th:value="${user.id}"
-                                               th:id="${'lecturer-' + user.id}">
+                                               th:id="${'lecturer-' + user.id}"
+                                               th:checked="${lecture.lecturerIds != null and #lists.contains(lecture.lecturerIds, user.id)}">
                                             <label class="selection-label" th:for="${'lecturer-' + user.id}">
                                                 <span class="selection-text">
                                                     <span class="selection-title" th:text="${user.name}"></span>
@@ -192,9 +193,10 @@
                                         <div th:each="group : ${groups}" class="selection-item" data-filter-item="group-selection" th:attr="data-filter-value=${group.code}">
                                             <input class="selection-input"
                                                type="checkbox"
-                                               th:field="*{groupIds}"
+                                               name="groupIds"
                                                th:value="${group.id}"
-                                               th:id="${'group-' + group.id}">
+                                               th:id="${'group-' + group.id}"
+                                               th:checked="${lecture.groupIds != null and #lists.contains(lecture.groupIds, group.id)}">
                                             <label class="selection-label" th:for="${'group-' + group.id}">
                                                 <span class="selection-text">
                                                     <span class="selection-title" th:text="${group.code}"></span>
@@ -218,9 +220,9 @@
                                 <label for="status" class="form-label">სტატუსი</label>
                                 <select class="form-select form-select-animated" id="status" name="status" th:field="*{status}" required>
                                     <option value="">აირჩიე სტატუსი</option>
-                                    <option th:each="status : ${T(com.tlat.Entity.LectureStatus).values()}"
+                                    <option th:each="status : ${T(com.tlat.entity.LectureStatus).values()}"
                                             th:value="${status}" 
-                                            th:text="${status}">
+                                            th:text="${status.displayName}">
                                     </option>
                                 </select>
                                 <p th:if="${#fields.hasErrors('status')}" th:errors="*{status}" class="text-danger"></p>

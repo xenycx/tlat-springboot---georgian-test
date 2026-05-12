@@ -130,17 +130,43 @@
                 <div class="col-md-6">
                     <div class="form-group mb-3">
                         <label class="form-label">როლი</label>
-                        <select class="form-select form-select-animated" id="role" name="role" th:field="*{role}">
-                            <option value="ROLE_USER">მომხმარებელი</option>
+                        <select class="form-select form-select-animated" id="role" name="role" th:field="*{role}" onchange="toggleGroupRequired()">
+                            <option value="ROLE_LECTURER">ლექტორი</option>
                             <option value="ROLE_ADMIN">ადმინისტრატორი</option>
+                            <option value="ROLE_STUDENT">სტუდენტი</option>
                         </select>
                         <p th:errors="*{role}" class="text-danger" 
                             th:if="${#fields.hasErrors('role')}"></p>
                     </div>
                 </div>
+                <div class="col-md-6" id="groupSelectionContainer" style="display: none;">
+                    <div class="form-group mb-3">
+                        <label class="form-label">სტუდენტის ჯგუფი</label>
+                        <select class="form-select form-select-animated" id="groupId" name="groupId" th:field="*{groupId}">
+                            <option value="" selected>აირჩიეთ ჯგუფი...</option>
+                            <option th:each="group : ${groups}" th:value="${group.id}" th:text="${group.code}"></option>
+                        </select>
+                        <p th:errors="*{groupId}" class="text-danger" th:if="${#fields.hasErrors('groupId')}"></p>
+                    </div>
+                </div>
             </div>
             
             <script>
+                function toggleGroupRequired() {
+                    var roleSelect = document.getElementById("role");
+                    var groupContainer = document.getElementById("groupSelectionContainer");
+                    if (roleSelect && roleSelect.value === 'ROLE_STUDENT') {
+                        groupContainer.style.display = 'block';
+                    } else {
+                        groupContainer.style.display = 'none';
+                        var groupSelect = document.getElementById("groupId");
+                        if(groupSelect) groupSelect.value = "";
+                    }
+                }
+                
+                // Call it once on load to set correct visibility
+                document.addEventListener('DOMContentLoaded', toggleGroupRequired);
+
                 function previewAvatar(input) {
                     if (input.files && input.files[0]) {
                         var reader = new FileReader();

@@ -36,3 +36,4 @@ build/
 .mvn/boot*.log
 uploads/
 .playwright-mcp/
+.env

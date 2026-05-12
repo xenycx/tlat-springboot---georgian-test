@@ -13,7 +13,7 @@ import com.itextpdf.layout.element.Paragraph;
 import com.itextpdf.layout.element.Table;
 import com.itextpdf.layout.properties.TextAlignment;
 import com.itextpdf.layout.properties.UnitValue;
-import com.tlat.Dto.LectureDto;
+import com.tlat.dto.LectureDto;
 import com.tlat.service.PdfExportService;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
@@ -161,7 +161,7 @@ public class PdfExportServiceImpl implements PdfExportService {
     }
     
     // ლექციის სტატუსები
-    private String getStatusInGeorgian(com.tlat.Entity.LectureStatus status) {
+    private String getStatusInGeorgian(com.tlat.entity.LectureStatus status) {
         if (status == null) return "მითითებული არ არის";
         
         switch (status) {

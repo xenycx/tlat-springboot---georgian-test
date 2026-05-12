@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
     <meta charset="UTF-8">
@@ -239,6 +239,11 @@
                     <h5>ჯგუფები</h5>
                     <p>იხილეთ ჯგუფები</p>
                 </a>
+                <a href="/grading/hub" class="nav-card card-animated nav-card-animated" sec:authorize="hasAnyRole('ADMIN','LECTURER')">
+                    <i class="bi bi-star-fill" style="font-size: 2rem; margin-bottom: 0.5rem; color: #ffc107;"></i>
+                    <h5>შეფასების ცენტრი</h5>
+                    <p>შეაფასეთ სტუდენტები</p>
+                </a>
                 <a href="/lectures" class="nav-card card-animated nav-card-animated">
                     <i class="bi bi-book-fill" style="font-size: 2rem; margin-bottom: 0.5rem;"></i>
                     <h5>ლექციები</h5>
@@ -248,11 +253,6 @@
                     <i class="bi bi-folder-fill" style="font-size: 2rem; margin-bottom: 0.5rem;"></i>
                     <h5>რესურსები</h5>
                     <p>სასწავლო რესურსების მართვა</p>
-                </a>
-                <a href="/materials" class="nav-card card-animated nav-card-animated" sec:authorize="hasRole('STUDENT')">
-                    <i class="bi bi-folder-fill" style="font-size: 2rem; margin-bottom: 0.5rem;"></i>
-                    <h5>სასწავლო მასალები</h5>
-                    <p>იხილეთ სასწავლო რესურსები</p>
                 </a>
             </div>
 
@@ -292,18 +292,18 @@
                                 <td class="d-none d-md-table-cell" th:text="${lecture.subject}">Test Subject</td>
                                 <td class="d-none d-lg-table-cell" th:text="${lecture.lecturer}">John Doe</td>
                                 <td>
-                                    <div sec:authorize="hasRole('USER')" class="btn-group-responsive">
+                                    <div sec:authorize="hasAnyRole('ADMIN','LECTURER')" class="btn-group-responsive">
                                         <form th:if="${lecture != null && #strings.toString(lecture.status) == 'SCHEDULED'}" 
-                                              th:action="@{/lectures/start/{id}(id=${lecture.id})}" 
+                                              th:action="@{/lectures/start/{id}(id=${lecture.scheduleId})}" 
                                               method="post" style="display: inline;">
                                             <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
                                             <button type="submit" class="btn btn-success btn-sm btn-animated" title="დაწყება">
-                                                <i class="bi bi-play-fill"></i><span class="d-none d-sm-inline"> დაწყებ</span>
+                                                <i class="bi bi-play-fill"></i><span class="d-none d-sm-inline"> დაწყება</span>
                                             </button>
                                         </form>
                                         
                                         <form th:if="${lecture != null && #strings.toString(lecture.status) == 'IN_PROGRESS'}" 
-                                              th:action="@{/lectures/stop/{id}(id=${lecture.id})}" 
+                                              th:action="@{/lectures/stop/{id}(id=${lecture.scheduleId})}" 
                                               method="post" style="display: inline;">
                                             <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
                                             <button type="submit" class="btn btn-warning btn-sm btn-animated" title="გაჩერება">
@@ -318,7 +318,7 @@
                                           (#strings.toString(lecture.status) == 'SCHEDULED' ? 'bg-primary' : 
                                            (#strings.toString(lecture.status) == 'IN_PROGRESS' ? 'bg-warning badge-status-in-progress' :
                                             (#strings.toString(lecture.status) == 'COMPLETED' ? 'bg-success' : 'bg-danger')))}">
-                                        <span th:text="${lecture.status}"></span>
+                                        <span th:text="${lecture.status.displayName}"></span>
                                     </span>
                                 </td>
                             </tr>

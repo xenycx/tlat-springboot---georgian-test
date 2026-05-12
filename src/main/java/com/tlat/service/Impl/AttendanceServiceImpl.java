@@ -1,9 +1,9 @@
 package com.tlat.service.Impl;
 
-import com.tlat.Entity.*;
-import com.tlat.Repository.AttendanceRecordRepository;
-import com.tlat.Repository.LectureScheduleRepository;
-import com.tlat.Repository.UserRepository;
+import com.tlat.entity.*;
+import com.tlat.repository.AttendanceRecordRepository;
+import com.tlat.repository.LectureScheduleRepository;
+import com.tlat.repository.UserRepository;
 import com.tlat.service.AttendanceService;
 import jakarta.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;

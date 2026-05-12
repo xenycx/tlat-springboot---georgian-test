@@ -42,7 +42,38 @@
             <p th:text="${successMessage}" class="mb-0"></p>
         </div>
 
-        <div class="card card-animated animate-fade-in-up">
+        <div class="card card-animated mb-4 animate-fade-in-up">
+            <div class="card-body">
+                <form method="get" th:action="@{/users}" class="row g-3">
+                    <div class="col-md-3">
+                        <label for="role" class="form-label">როლი</label>
+                        <select id="role" name="role" class="form-select form-select-animated">
+                            <option value="">ყველა როლი</option>
+                            <option value="ROLE_ADMIN" th:selected="${selectedRole == 'ROLE_ADMIN'}">ადმინისტრატორი</option>
+                            <option value="ROLE_LECTURER" th:selected="${selectedRole == 'ROLE_LECTURER'}">ლექტორი</option>
+                            <option value="ROLE_STUDENT" th:selected="${selectedRole == 'ROLE_STUDENT'}">სტუდენტი</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label for="groupId" class="form-label">სტუდენტის ჯგუფი</label>
+                        <select id="groupId" name="groupId" class="form-select form-select-animated">
+                            <option value="">ყველა ჯგუფი</option>
+                            <option th:each="group : ${groups}" th:value="${group.id}" th:text="${group.code}" th:selected="${selectedGroupId == group.id}"></option>
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <label for="search" class="form-label">ძიება</label>
+                        <input type="text" id="search" name="search" class="form-control form-control-animated" th:value="${searchQuery}" placeholder="სახელი, გვარი, მაილი...">
+                    </div>
+                    <div class="col-md-2 d-flex align-items-end gap-2">
+                        <button type="submit" class="btn btn-primary btn-animated flex-grow-1"><i class="bi bi-funnel"></i></button>
+                        <a th:href="@{/users}" class="btn btn-outline-secondary btn-animated"><i class="bi bi-x-circle"></i></a>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div class="card card-animated animate-fade-in-up" style="animation-delay: 0.1s;">
             <div class="card-body p-0">
                 <div class="table-responsive">
                 <table class="table table-striped table-hover mb-0 table-animated">
@@ -69,7 +100,13 @@
                             </td>
                             <td th:text="${user.firstName + ' ' + user.lastName}"></td>
                             <td class="d-none d-md-table-cell text-truncate" style="max-width: 200px;" th:text="${user.email}"></td>
-                            <td th:text="${user.role}"></td>
+                            <td>
+                                <span th:if="${user.role == 'ROLE_ADMIN'}" class="badge bg-danger">ადმინისტრატორი</span>
+                                <span th:if="${user.role == 'ROLE_LECTURER'}" class="badge bg-primary">ლექტორი</span>
+                                <span th:if="${user.role == 'ROLE_STUDENT'}" class="badge bg-info text-dark">სტუდენტი</span>
+                                <span th:if="${user.role != 'ROLE_ADMIN' and user.role != 'ROLE_LECTURER' and user.role != 'ROLE_STUDENT'}" class="badge bg-secondary" th:text="${user.role}"></span>
+                                <div th:if="${user.role == 'ROLE_STUDENT' and user.groupCode != null}" class="small text-muted mt-1" th:text="${user.groupCode}"></div>
+                            </td>
                             <td>
                                 <div class="action-buttons" sec:authorize="hasRole('ROLE_ADMIN')">
                                     <a th:href="@{/edit/{userId}(userId=${user.id})}" class="btn btn-primary btn-sm btn-animated" title="რედაქტირება">

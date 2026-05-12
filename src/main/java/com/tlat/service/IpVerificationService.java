@@ -3,8 +3,8 @@ package com.tlat.service;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import jakarta.servlet.http.HttpServletRequest;
-import com.tlat.Repository.RoomRepository;
-import com.tlat.Entity.Room;
+import com.tlat.repository.RoomRepository;
+import com.tlat.entity.Room;
 
 @Service
 public class IpVerificationService {

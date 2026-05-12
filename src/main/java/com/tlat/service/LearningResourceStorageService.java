@@ -1,6 +1,6 @@
 package com.tlat.service;
 
-import com.tlat.Entity.User;
+import com.tlat.entity.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;

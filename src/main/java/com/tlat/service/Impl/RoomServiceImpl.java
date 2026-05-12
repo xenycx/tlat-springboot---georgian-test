@@ -2,9 +2,9 @@ package com.tlat.service.Impl;
 
 import org.springframework.stereotype.Service;
 
-import com.tlat.Dto.RoomDto;
-import com.tlat.Entity.Room;
-import com.tlat.Repository.RoomRepository;
+import com.tlat.dto.RoomDto;
+import com.tlat.entity.Room;
+import com.tlat.repository.RoomRepository;
 import com.tlat.service.RoomService;
 
 import jakarta.persistence.EntityNotFoundException;

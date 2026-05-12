@@ -1,6 +1,6 @@
 package com.tlat.service;
 
-import com.tlat.Dto.StudentGroupDto;
+import com.tlat.dto.StudentGroupDto;
 
 import java.util.List;
 

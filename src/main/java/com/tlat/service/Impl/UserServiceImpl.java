@@ -1,12 +1,12 @@
 package com.tlat.service.Impl;
 
-import com.tlat.Dto.UserDto;
-import com.tlat.Entity.Role;
-import com.tlat.Entity.StudentGroup;
-import com.tlat.Entity.User;
-import com.tlat.Repository.RoleRepository;
-import com.tlat.Repository.StudentGroupRepository;
-import com.tlat.Repository.UserRepository;
+import com.tlat.dto.UserDto;
+import com.tlat.entity.Role;
+import com.tlat.entity.StudentGroup;
+import com.tlat.entity.User;
+import com.tlat.repository.RoleRepository;
+import com.tlat.repository.StudentGroupRepository;
+import com.tlat.repository.UserRepository;
 import com.tlat.service.UserService;
 import jakarta.persistence.EntityNotFoundException;
 import org.slf4j.Logger;

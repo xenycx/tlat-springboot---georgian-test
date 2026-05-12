@@ -1,6 +1,6 @@
 package com.tlat.service;
 
-import com.tlat.Dto.LectureDto;
+import com.tlat.dto.LectureDto;
 import org.springframework.web.multipart.MultipartFile;
 import jakarta.servlet.http.HttpServletRequest;
 

@@ -1,10 +1,10 @@
 package com.tlat.service.Impl;
 
-import com.tlat.Dto.StudentGroupDto;
-import com.tlat.Entity.StudentGroup;
-import com.tlat.Repository.LectureRepository;
-import com.tlat.Repository.StudentGroupRepository;
-import com.tlat.Repository.UserRepository;
+import com.tlat.dto.StudentGroupDto;
+import com.tlat.entity.StudentGroup;
+import com.tlat.repository.LectureRepository;
+import com.tlat.repository.StudentGroupRepository;
+import com.tlat.repository.UserRepository;
 import com.tlat.service.StudentGroupService;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.stereotype.Service;

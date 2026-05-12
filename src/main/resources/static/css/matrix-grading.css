@@ -1,0 +1,107 @@
+/* Matrix Table Styling */
+.matrix-table {
+    white-space: nowrap;
+    min-width: 100%;
+}
+
+.matrix-table th, .matrix-table td {
+    text-align: center;
+    vertical-align: middle;
+    height: 50px;
+    padding: 0.25rem 0.5rem;
+}
+
+.matrix-table th {
+    font-weight: 600;
+}
+
+/* Sticky First Column */
+.matrix-table td:first-child,
+.matrix-table th:first-child {
+    position: sticky;
+    left: 0;
+    z-index: 2;
+    background-color: #212529; /* Match dark theme */
+    text-align: left;
+    min-width: 180px;
+    box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+}
+
+.matrix-table td:first-child {
+    background-color: #2d3238; /* Slightly lighter for rows */
+}
+
+/* Sticky Last Column */
+.matrix-table td:last-child,
+.matrix-table th:last-child {
+    position: sticky;
+    right: 0;
+    z-index: 2;
+    background-color: #212529;
+    font-weight: bold;
+    min-width: 120px;
+    box-shadow: -2px 0 5px rgba(0,0,0,0.1);
+}
+
+.matrix-table td:last-child {
+    background-color: #2a3036;
+}
+
+/* Grade Colors */
+.grade-cell {
+    cursor: pointer;
+    font-weight: bold;
+    transition: background-color 0.2s;
+    position: relative;
+}
+
+.grade-cell:hover {
+    filter: brightness(0.9);
+}
+
+.grade-A { background-color: #198754; color: white; }
+.grade-B { background-color: #20c997; color: white; }
+.grade-C { background-color: #ffc107; color: #212529; }
+.grade-D { background-color: #fd7e14; color: white; }
+.grade-E { background-color: #dc3545; color: white; }
+.grade-F { background-color: #842029; color: white; }
+.grade-empty { background-color: #f8f9fa; color: #adb5bd; cursor: cell; }
+
+/* In dark mode context, adjust empty */
+body .grade-empty { background-color: #343a40; color: #6c757d; }
+
+.grade-cell input {
+    width: 100%;
+    height: 100%;
+    border: none;
+    text-align: center;
+    font-weight: bold;
+    background: transparent;
+    color: inherit;
+    outline: none;
+}
+
+.grade-cell input:focus {
+    box-shadow: inset 0 0 0 2px rgba(255,255,255,0.5);
+    background: rgba(255,255,255,0.1);
+}
+
+.matrix-scroll-container {
+    max-height: 70vh;
+    overflow-y: auto;
+    overflow-x: auto;
+}
+
+/* Sticky Head */
+.matrix-table thead th {
+    position: sticky;
+    top: 0;
+    z-index: 3;
+}
+
+.matrix-table thead th:first-child {
+    z-index: 4; /* Top left corner needs highest index */
+}
+.matrix-table thead th:last-child {
+    z-index: 4; /* Top right corner */
+}

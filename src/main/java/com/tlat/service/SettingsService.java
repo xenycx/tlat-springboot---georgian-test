@@ -1,7 +1,7 @@
 package com.tlat.service;
 
-import com.tlat.Entity.AppSetting;
-import com.tlat.Repository.AppSettingRepository;
+import com.tlat.entity.AppSetting;
+import com.tlat.repository.AppSettingRepository;
 import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -15,6 +15,10 @@ import java.util.Map;
 public class SettingsService {
 
     public static final String KEY_LECTURER_MAX_FILE_SIZE_MB = "lecturer.max.file.size.mb";
+    public static final String KEY_MAX_ATTENDANCE_SCORE = "grading.max.attendance.score";
+    public static final String KEY_MAX_MIDTERM_SCORE = "grading.max.midterm.score";
+    public static final String KEY_MAX_FINAL_SCORE = "grading.max.final.score";
+    public static final String KEY_SEMESTER_WEEKS = "grading.semester.weeks";
 
     private final AppSettingRepository repository;
 
@@ -32,6 +36,10 @@ public class SettingsService {
         upsertIfAbsent(KEY_LECTURER_MAX_FILE_SIZE_MB,
                 String.valueOf(defaultLecturerMaxSizeBytes / (1024 * 1024)),
                 "ლექტორის მიერ ატვირთული ფაილის მაქსიმალური ზომა MB-ში");
+        upsertIfAbsent(KEY_MAX_ATTENDANCE_SCORE, "30", "დასწრების და აქტივობის მაქსიმალური ქულა");
+        upsertIfAbsent(KEY_MAX_MIDTERM_SCORE, "30", "შუალედური გამოცდის მაქსიმალური ქულა");
+        upsertIfAbsent(KEY_MAX_FINAL_SCORE, "40", "ფინალური გამოცდის მაქსიმალური ქულა");
+        upsertIfAbsent(KEY_SEMESTER_WEEKS, "13", "სემესტრის ხანგრძლივობა (კვირები)");
     }
 
     public String get(String key, String defaultValue) {

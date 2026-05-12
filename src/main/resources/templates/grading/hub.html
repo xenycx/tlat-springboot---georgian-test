@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="ka" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>შეფასების მატრიცა (Grading Matrix)</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css">
+    <link rel="stylesheet" th:href="@{/css/dark-theme.css}">
+    <link rel="stylesheet" th:href="@{/css/animations.css}">
+    <link rel="stylesheet" th:href="@{/css/matrix-grading.css}">
+</head>
+<body>
+<div th:replace="~{common/nav :: nav-bar}"></div>
+
+<div class="container-fluid py-4 page-content px-4">
+    <div class="d-flex justify-content-between align-items-center mb-4 animate-fade-in-down">
+        <h2 class="fw-bold">
+            <i class="bi bi-grid-3x3-gap-fill icon-animated text-warning"></i> შეფასების მატრიცა
+        </h2>
+    </div>
+
+    <!-- Selectors -->
+    <div class="card card-animated animate-fade-in-up mb-4">
+        <div class="card-body">
+            <div class="row align-items-end g-3">
+                <div class="col-md-5">
+                    <label for="lectureSelect" class="form-label">საგანი</label>
+                    <select id="lectureSelect" class="form-select">
+                        <option value="" selected disabled>აირჩიეთ საგანი...</option>
+                        <option th:each="lecture : ${myLectures}"
+                                th:value="${lecture.id}"
+                                th:text="${lecture.subject}">
+                        </option>
+                    </select>
+                </div>
+                <div class="col-md-5">
+                    <label for="groupSelect" class="form-label">ჯგუფი</label>
+                    <select id="groupSelect" class="form-select" disabled>
+                        <option value="" selected disabled>ჯერ აირჩიეთ საგანი...</option>
+                        <option value="0">ყველა ჯგუფი</option>
+                        <option th:each="group : ${groups}"
+                                th:value="${group.id}"
+                                th:text="${group.code}">
+                        </option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <button id="loadMatrixBtn" class="btn btn-primary w-100" disabled>
+                        <i class="bi bi-table"></i> ჩატვირთვა
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Matrix Container -->
+    <div id="matrixContainer" class="card card-animated animate-fade-in-up d-none">
+        <div class="card-header bg-transparent border-bottom border-dark py-3 d-flex justify-content-between align-items-center">
+            <h5 class="mb-0" id="matrixTitle"><i class="bi bi-calendar-week"></i> სემესტრის უწყისი</h5>
+            <div id="matrixInfo" class="badge bg-secondary"></div>
+        </div>
+        <!-- Table Filter -->
+        <div class="card-body border-bottom border-dark py-3" id="matrixFilterSection">
+            <div class="row g-3">
+                <div class="col-md-4">
+                    <label for="tableSearchInput" class="form-label text-muted small mb-1">სტუდენტის ძიება</label>
+                    <div class="input-group">
+                        <span class="input-group-text bg-dark border-secondary text-white"><i class="bi bi-search"></i></span>
+                        <input type="text" id="tableSearchInput" class="form-control bg-dark text-white border-secondary" placeholder="სახელი ან გვარი...">
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <label for="tableGroupSelect" class="form-label text-muted small mb-1">ჯგუფის ფილტრი</label>
+                    <select id="tableGroupSelect" class="form-select bg-dark text-white border-secondary">
+                        <option value="">ყველა ჯგუფი</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive matrix-scroll-container">
+                <table class="table table-bordered table-hover mb-0 matrix-table">
+                    <thead class="table-dark" id="matrixHead">
+                        <!-- Headers injected via JS -->
+                    </thead>
+                    <tbody id="matrixBody">
+                        <!-- Rows injected via JS -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Add Record Modal -->
+<div class="modal fade" id="addRecordModal" tabindex="-1">
+  <div class="modal-dialog modal-sm">
+    <div class="modal-content text-dark">
+      <div class="modal-header">
+        <h5 class="modal-title">შეფასების დამატება</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <p class="mb-1" id="modalStudentName"></p>
+        <p class="text-muted small mb-3" id="modalWeekLabel"></p>
+        <form id="addRecordForm">
+            <input type="hidden" id="modalStudentId">
+            <input type="hidden" id="modalWeek">
+            <div class="mb-3">
+                <label for="modalScore" class="form-label">ქულა</label>
+                <input type="number" class="form-control" id="modalScore" min="0" step="1" required>
+            </div>
+            <button type="submit" class="btn btn-success w-100">დამატება</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Toast Container -->
+<div class="position-fixed bottom-0 end-0 p-3" style="z-index: 1100">
+  <div id="toastMessage" class="toast align-items-center text-white bg-success border-0" role="alert" aria-live="assertive" aria-atomic="true">
+    <div class="d-flex">
+      <div class="toast-body" id="toastBody">
+        ცვლილება შენახულია.
+      </div>
+      <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"></script>
+<script th:src="@{/js/matrix-grading.js}"></script>
+</body>
+</html>

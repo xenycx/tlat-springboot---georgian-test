@@ -32,11 +32,28 @@
     </div>
 
     <script type="text/javascript">
-        function makePasswordRequiredOnLoad() {
-            var field = document.getElementById("password");
-            field.required = true;
+        function togglePasswordRequired() {
+            var roleSelect = document.getElementById("role");
+            var passwordField = document.getElementById("password");
+            
+            if (roleSelect && roleSelect.value === 'ROLE_STUDENT') {
+                passwordField.required = false;
+                passwordField.placeholder = "პაროლი აღარ არის სავალდებულო სტუდენტებისთვის...";
+            } else {
+                passwordField.required = true;
+                passwordField.placeholder = "შეიყვანეთ პაროლი...";
+            }
         }
-        window.onload = makePasswordRequiredOnLoad;
+
+        function initForm() {
+            var roleSelect = document.getElementById("role");
+            if (roleSelect) {
+                roleSelect.addEventListener('change', togglePasswordRequired);
+            }
+            togglePasswordRequired();
+        }
+        
+        window.onload = initForm;
     </script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"></script>
 </body>

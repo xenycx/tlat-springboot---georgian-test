@@ -1,8 +1,8 @@
 package com.tlat.service;
 
-import com.tlat.Entity.AttendanceRecord;
-import com.tlat.Entity.LectureSchedule;
-import com.tlat.Entity.User;
+import com.tlat.entity.AttendanceRecord;
+import com.tlat.entity.LectureSchedule;
+import com.tlat.entity.User;
 import jakarta.servlet.http.HttpServletRequest;
 
 import java.util.List;

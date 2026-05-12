@@ -1,10 +1,10 @@
 package com.tlat.service;
 
-import com.tlat.Dto.LectureDto;
-import com.tlat.Dto.ResourceFormDto;
-import com.tlat.Entity.LearningResource;
-import com.tlat.Entity.ResourceAuditLog;
-import com.tlat.Entity.User;
+import com.tlat.dto.LectureDto;
+import com.tlat.dto.ResourceFormDto;
+import com.tlat.entity.LearningResource;
+import com.tlat.entity.ResourceAuditLog;
+import com.tlat.entity.User;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.nio.file.Path;

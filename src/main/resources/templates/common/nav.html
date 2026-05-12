@@ -282,15 +282,15 @@
                             </a>
                         </li>
                         <li class="nav-item" sec:authorize="hasAnyRole('ADMIN','LECTURER')">
+                            <a class="nav-link active" th:href="@{/grading/hub}">
+                                <i class="bi bi-star-fill"></i>
+                                <span class="nav-link-label">შეფასება</span>
+                            </a>
+                        </li>
+                        <li class="nav-item" sec:authorize="hasAnyRole('ADMIN','LECTURER')">
                             <a class="nav-link active" th:href="@{/resources}">
                                 <i class="bi bi-folder-fill"></i>
                                 <span class="nav-link-label">რესურსები</span>
-                            </a>
-                        </li>
-                        <li class="nav-item" sec:authorize="hasRole('STUDENT')">
-                            <a class="nav-link active" th:href="@{/materials}">
-                                <i class="bi bi-journal-bookmark-fill"></i>
-                                <span class="nav-link-label">მასალები</span>
                             </a>
                         </li>
                     </ul>

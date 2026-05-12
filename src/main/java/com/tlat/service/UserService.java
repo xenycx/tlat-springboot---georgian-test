@@ -1,7 +1,7 @@
 package com.tlat.service;
 
-import com.tlat.Dto.UserDto;
-import com.tlat.Entity.User;
+import com.tlat.dto.UserDto;
+import com.tlat.entity.User;
 
 import java.util.List;
 

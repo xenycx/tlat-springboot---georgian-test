@@ -1,6 +1,6 @@
 package com.tlat.service;
 
-import com.tlat.Dto.LectureDto;
+import com.tlat.dto.LectureDto;
 import java.io.ByteArrayOutputStream;
 import java.util.List;
 

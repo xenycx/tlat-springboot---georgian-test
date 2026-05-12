@@ -90,6 +90,35 @@
                 </div>
             </div>
 
+            <!-- Grading Settings -->
+            <div class="card card-animated animate-fade-in-up mb-4">
+                <div class="card-header d-flex align-items-center gap-2">
+                    <i class="ri-file-chart-fill text-warning"></i>
+                    <strong>შეფასების სისტემა</strong>
+                </div>
+                <div class="card-body">
+                    <div th:each="setting : ${settings}"
+                         th:if="${#strings.startsWith(setting.key, 'grading.')}"
+                         class="row align-items-center setting-card p-3">
+                        <div class="col-md-7 mb-2 mb-md-0">
+                            <div class="fw-semibold" th:text="${setting.description}">აღწერა</div>
+                            <div class="setting-key mt-1" th:text="${setting.key}"></div>
+                        </div>
+                        <div class="col-md-5">
+                            <div class="input-group">
+                                <input type="number"
+                                       class="form-control"
+                                       th:name="${setting.key}"
+                                       th:value="${setting.value}"
+                                       min="1"
+                                       max="100"
+                                       required>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <!-- Future settings sections can be added here as new cards -->
 
             <div class="d-flex gap-2 mt-2">
