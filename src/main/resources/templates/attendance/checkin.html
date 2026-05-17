@@ -132,7 +132,7 @@
                     </div>
 
                     <!-- Self-identification form -->
-                    <div class="mt-3">
+                    <div class="mt-3" th:if="${currentUser == null || (isStudent != null && isStudent)}">
                         <h6 class="mb-3">
                             <i class="bi bi-person-badge"></i> 
                             <span th:if="${currentUser == null}">თვითიდენტიფიკაცია (დაბალი ნდობა)</span>

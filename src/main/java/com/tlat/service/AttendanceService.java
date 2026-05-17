@@ -19,6 +19,8 @@ public interface AttendanceService {
 
     AttendanceRecord markAttendanceManual(Long scheduleId, Long studentId, User lecturer);
 
+    void verifyAttendance(Long recordId);
+
     List<AttendanceRecord> getAttendanceForSchedule(Long scheduleId);
 
     List<User> getEligibleStudentsForSchedule(Long scheduleId);

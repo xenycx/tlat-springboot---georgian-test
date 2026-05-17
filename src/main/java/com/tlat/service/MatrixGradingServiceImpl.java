@@ -39,7 +39,8 @@ public class MatrixGradingServiceImpl implements MatrixGradingService {
     @Override
     @Transactional(readOnly = true)
     public MatrixGradingDTO getMatrixData(Long lectureId, Long groupId, String username) {
-        Lecture lecture = lectureRepository.findById(lectureId)
+        Long nonNullLectureId = Objects.requireNonNull(lectureId, "lectureId is required");
+        Lecture lecture = lectureRepository.findById(nonNullLectureId)
                 .orElseThrow(() -> new IllegalArgumentException("Lecture not found"));
         
         StudentGroup group = null;
@@ -70,12 +71,12 @@ public class MatrixGradingServiceImpl implements MatrixGradingService {
             weeklyMaxScores.add(i < remainder ? baseWeekScore + 1 : baseWeekScore);
         }
 
-        List<LectureSchedule> schedules = scheduleRepository.findByLecture_IdOrderByDateAscStartTimeAsc(lectureId);
+        List<LectureSchedule> schedules = scheduleRepository.findByLecture_IdOrderByDateAscStartTimeAsc(nonNullLectureId);
         
         LocalDate semesterStartDate = schedules.isEmpty() ? LocalDate.now() : schedules.get(0).getDate();
 
         // Get all records for this lecture
-        List<AttendanceRecord> records = attendanceRepository.findBySchedule_Lecture_Id(lectureId);
+        List<AttendanceRecord> records = attendanceRepository.findBySchedule_Lecture_Id(nonNullLectureId);
         
         List<User> students;
         List<StudentGrade> grades;
@@ -222,9 +223,11 @@ public class MatrixGradingServiceImpl implements MatrixGradingService {
     @Override
     @Transactional
     public CreateRecordResponse createRecord(CreateRecordRequest request, String username) {
-        Lecture lecture = lectureRepository.findById(request.getLectureId())
+        Long lectureId = Objects.requireNonNull(request.getLectureId(), "lectureId is required");
+        Long studentId = Objects.requireNonNull(request.getStudentId(), "studentId is required");
+        Lecture lecture = lectureRepository.findById(lectureId)
                 .orElseThrow(() -> new IllegalArgumentException("Lecture not found"));
-        User student = userRepository.findById(request.getStudentId())
+        User student = userRepository.findById(studentId)
                 .orElseThrow(() -> new IllegalArgumentException("Student not found"));
 
         User requestingUser = userService.findUserByEmail(username);
@@ -294,11 +297,14 @@ public class MatrixGradingServiceImpl implements MatrixGradingService {
     @Override
     @Transactional
     public UpdateScoreResponse updateExamScore(UpdateExamRequest request, String username) {
-        Lecture lecture = lectureRepository.findById(request.getLectureId())
+        Long lectureId = Objects.requireNonNull(request.getLectureId(), "lectureId is required");
+        Long studentId = Objects.requireNonNull(request.getStudentId(), "studentId is required");
+        Long groupId = Objects.requireNonNull(request.getGroupId(), "groupId is required");
+        Lecture lecture = lectureRepository.findById(lectureId)
                 .orElseThrow(() -> new IllegalArgumentException("Lecture not found"));
-        User student = userRepository.findById(request.getStudentId())
+        User student = userRepository.findById(studentId)
                 .orElseThrow(() -> new IllegalArgumentException("Student not found"));
-        StudentGroup group = groupRepository.findById(request.getGroupId())
+        StudentGroup group = groupRepository.findById(groupId)
                 .orElseThrow(() -> new IllegalArgumentException("Group not found"));
 
         User requestingUser = userService.findUserByEmail(username);
@@ -364,12 +370,13 @@ public class MatrixGradingServiceImpl implements MatrixGradingService {
     }
 
     private UpdateScoreResponse calculateResponse(User student, LocalDate scheduleDate, Long lectureId, Long groupId) {
-        List<LectureSchedule> schedules = scheduleRepository.findByLecture_IdOrderByDateAscStartTimeAsc(lectureId);
+        Long nonNullLectureId = Objects.requireNonNull(lectureId, "lectureId is required");
+        List<LectureSchedule> schedules = scheduleRepository.findByLecture_IdOrderByDateAscStartTimeAsc(nonNullLectureId);
         LocalDate startDate = schedules.isEmpty() ? LocalDate.now() : schedules.get(0).getDate();
         
         int targetWeek = scheduleDate != null ? getWeekNumber(scheduleDate, startDate) : -1;
         
-        List<AttendanceRecord> records = attendanceRepository.findBySchedule_Lecture_Id(lectureId).stream()
+        List<AttendanceRecord> records = attendanceRepository.findBySchedule_Lecture_Id(nonNullLectureId).stream()
                 .filter(r -> r.getStudent().getId().equals(student.getId()))
                 .collect(Collectors.toList());
                 
@@ -385,7 +392,7 @@ public class MatrixGradingServiceImpl implements MatrixGradingService {
                 .mapToDouble(r -> r.getScore() != null ? r.getScore() : 0.0)
                 .sum();
 
-        Lecture lecture = lectureRepository.findById(lectureId).orElse(null);
+        Lecture lecture = lectureRepository.findById(nonNullLectureId).orElse(null);
         Optional<StudentGrade> studentGradeOpt = studentGradeRepository.findByStudentIdAndSubjectAndGroupId(
                 student.getId(), lecture != null ? lecture.getSubject() : "", groupId);
         

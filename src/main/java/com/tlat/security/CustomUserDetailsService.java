@@ -27,13 +27,6 @@ public class CustomUserDetailsService implements UserDetailsService {
         User user = userRepository.findByEmail(email);
 
         if (user != null) {
-            boolean isOnlyStudent = user.getRoles().size() == 1 && 
-                                    user.getRoles().stream().anyMatch(r -> "ROLE_STUDENT".equals(r.getName()));
-            
-            if (isOnlyStudent) {
-                throw new org.springframework.security.authentication.DisabledException("სტუდენტების ავტორიზაცია გამორთულია.");
-            }
-
             return new org.springframework.security.core.userdetails.User(user.getEmail(),
                     user.getPassword(),
                     mapRolesToAuthorities(user.getRoles()));

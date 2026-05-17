@@ -108,12 +108,32 @@
                             <p th:text="${errorMessage}" class="mb-0"></p>
                         </div>
 
-                        <form th:action="@{/lectures/add}" th:object="${lecture}" method="post">
+                        <form id="lectureForm" th:action="@{/lectures/add}" th:object="${lecture}" method="post">
                             <div th:if="${#fields.hasAnyErrors()}" class="alert alert-danger">
                                 <p class="mb-2">ფორმა ვერ შეინახა. შეასწორე ველები:</p>
                                 <ul class="mb-0 ps-3">
                                     <li th:each="err : ${#fields.errors('*')}" th:text="${err}"></li>
                                 </ul>
+                            </div>
+
+                            <div class="form-group mb-4">
+                                <label for="lectureSelectionMode" class="form-label fw-bold"><i class="bi bi-diagram-2"></i> კურსის არჩევა <small class="fw-normal text-muted">(არსებული ან ახალი)</small></label>
+                                <select class="form-select form-select-animated bg-light" id="lectureSelectionMode" name="lectureId" th:field="*{lectureId}" onchange="toggleLectureMode()">
+                                    <option value="">-- შექმენი ახალი კურსი --</option>
+                                    <optgroup label="არსებული კურსები">
+                                        <option th:each="extLec : ${existingLectures}" 
+                                                th:value="${extLec.id}" 
+                                                th:text="${extLec.subject + ' (' + extLec.lecturer + ')'}">
+                                        </option>
+                                    </optgroup>
+                                </select>
+                                <div class="form-text">აირჩიე არსებული კურსი რომ ახალი დრო (შეხვედრა) დაუმატო, ან შექმენი სულ ახალი კურსი.</div>
+                            </div>
+
+                            <div class="form-group mb-3 form-group-subject hide-on-existing">
+                                <label for="subject" class="form-label">საგანი</label>
+                                <input type="text" class="form-control form-control-animated" id="subject" name="subject" th:field="*{subject}">
+                                <p th:if="${#fields.hasErrors('subject')}" th:errors="*{subject}" class="text-danger"></p>
                             </div>
 
                             <div class="form-group mb-3">
@@ -148,7 +168,7 @@
                                 </div>
                             </div>
 
-                            <div class="form-group mb-3">
+                            <div class="form-group mb-3 hide-on-existing">
                                 <label class="form-label">ლექტორები</label>
                                 <div class="selection-panel">
                                     <div th:if="${#lists.isEmpty(users)}" class="text-muted">ლექტორები ვერ მოიძებნა</div>
@@ -179,7 +199,7 @@
                                 <p th:if="${#fields.hasErrors('lecturerIds')}" th:errors="*{lecturerIds}" class="text-danger"></p>
                             </div>
 
-                            <div class="form-group mb-3">
+                            <div class="form-group mb-3 hide-on-existing">
                                 <label class="form-label">ჯგუფები</label>
                                 <div class="selection-panel">
                                     <div th:if="${#lists.isEmpty(groups)}" class="text-muted">ჯგუფები ვერ მოიძებნა</div>
@@ -210,13 +230,7 @@
                                 <p th:if="${#fields.hasErrors('groupIds')}" th:errors="*{groupIds}" class="text-danger"></p>
                             </div>
 
-                            <div class="form-group mb-3">
-                                <label for="subject" class="form-label">საგანი</label>
-                                <input type="text" class="form-control form-control-animated" id="subject" name="subject" th:field="*{subject}" required>
-                                <p th:if="${#fields.hasErrors('subject')}" th:errors="*{subject}" class="text-danger"></p>
-                            </div>
-
-                            <div class="form-group mb-3">
+                            <div class="form-group mb-3 hide-on-existing">
                                 <label for="status" class="form-label">სტატუსი</label>
                                 <select class="form-select form-select-animated" id="status" name="status" th:field="*{status}" required>
                                     <option value="">აირჩიე სტატუსი</option>
@@ -241,6 +255,37 @@
         integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM"
         crossorigin="anonymous"></script>
     <script>
+        function toggleLectureMode() {
+            const form = document.getElementById('lectureForm');
+            const select = document.getElementById('lectureSelectionMode');
+            const elementsToHide = document.querySelectorAll('.hide-on-existing');
+            const isExisting = select.value !== '';
+            
+            // Set required / toggle visibility
+            elementsToHide.forEach(el => {
+                if(isExisting) {
+                    el.style.display = 'none';
+                    // Remove required from subject if hidden
+                    const subjectInput = document.getElementById('subject');
+                    if(subjectInput) subjectInput.removeAttribute('required');
+                } else {
+                    el.style.display = 'block';
+                    const subjectInput = document.getElementById('subject');
+                    if(subjectInput) subjectInput.setAttribute('required', 'required');
+                }
+            });
+            
+            // Change action route
+            if(isExisting) {
+                form.action = '/lectures/add-schedule-only';
+            } else {
+                form.action = '/lectures/add';
+            }
+        }
+        
+        // init on load
+        document.addEventListener('DOMContentLoaded', toggleLectureMode);
+
         document.querySelectorAll('[data-filter-input]').forEach(function (input) {
             input.addEventListener('input', function () {
                 var target = input.getAttribute('data-filter-target');

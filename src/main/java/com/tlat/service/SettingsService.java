@@ -7,9 +7,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
+import java.util.Objects;
 
 @Service
 public class SettingsService {
@@ -43,7 +42,7 @@ public class SettingsService {
     }
 
     public String get(String key, String defaultValue) {
-        return repository.findById(key)
+        return repository.findById(Objects.requireNonNull(key, "setting key is required"))
                 .map(AppSetting::getValue)
                 .orElse(defaultValue);
     }
@@ -64,7 +63,8 @@ public class SettingsService {
 
     @Transactional
     public void update(String key, String value) {
-        AppSetting setting = repository.findById(key)
+        String nonNullKey = Objects.requireNonNull(key, "setting key is required");
+        AppSetting setting = repository.findById(nonNullKey)
                 .orElseThrow(() -> new IllegalArgumentException("Unknown setting key: " + key));
         setting.setValue(value);
         repository.save(setting);
@@ -75,8 +75,9 @@ public class SettingsService {
     }
 
     private void upsertIfAbsent(String key, String value, String description) {
-        if (!repository.existsById(key)) {
-            repository.save(new AppSetting(key, value, description));
+        String nonNullKey = Objects.requireNonNull(key, "setting key is required");
+        if (!repository.existsById(nonNullKey)) {
+            repository.save(new AppSetting(nonNullKey, value, description));
         }
     }
 }

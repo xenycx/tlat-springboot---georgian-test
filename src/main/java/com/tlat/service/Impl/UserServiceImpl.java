@@ -9,14 +9,9 @@ import com.tlat.repository.StudentGroupRepository;
 import com.tlat.repository.UserRepository;
 import com.tlat.service.UserService;
 import jakarta.persistence.EntityNotFoundException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.DataAccessException;
 import org.springframework.context.event.EventListener;
-import org.springframework.jdbc.core.ConnectionCallback;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -30,7 +25,7 @@ import java.util.stream.Collectors;
 @Service
 public class UserServiceImpl implements UserService {
 
-    private static final Logger log = LoggerFactory.getLogger(UserServiceImpl.class);
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(UserServiceImpl.class);
 
     @Autowired
     private UserRepository userRepository;
@@ -44,67 +39,51 @@ public class UserServiceImpl implements UserService {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
-    @Autowired
-    private JdbcTemplate jdbcTemplate;
-
     @EventListener(ApplicationReadyEvent.class)
     @Transactional
     public void initializeRolesAndMigrateLegacyRole() {
-        dropLegacyIsPaidColumnIfExists();
+        log.info("Starting roles initialization and legacy role migration...");
         Role lecturerRole = ensureRoleExists("ROLE_LECTURER");
         ensureRoleExists("ROLE_STUDENT");
         ensureRoleExists("ROLE_ADMIN");
 
         Role legacyUserRole = roleRepository.findByName("ROLE_USER");
         if (legacyUserRole == null) {
+            log.info("No ROLE_USER found, skipping migration.");
             return;
         }
 
-        List<User> users = userRepository.findAll();
-        for (User user : users) {
-            boolean hasLegacyRole = user.getRoles().stream()
-                    .anyMatch(role -> "ROLE_USER".equals(role.getName()));
-            if (!hasLegacyRole) {
-                continue;
-            }
-
-            user.getRoles().removeIf(role -> "ROLE_USER".equals(role.getName()));
-            boolean alreadyLecturer = user.getRoles().stream()
-                    .anyMatch(role -> "ROLE_LECTURER".equals(role.getName()));
-            if (!alreadyLecturer) {
-                user.getRoles().add(lecturerRole);
-            }
+        // Only fetch users that actually have the legacy role
+        List<User> usersWithLegacyRole = userRepository.findAllByRoles_Name("ROLE_USER");
+        if (usersWithLegacyRole.isEmpty()) {
+            log.info("No users found with ROLE_USER. Cleaning up legacy role...");
+            roleRepository.delete(legacyUserRole);
+            return;
         }
-        userRepository.saveAll(users);
+
+        log.info("Found {} users with legacy ROLE_USER to migrate.", usersWithLegacyRole.size());
+        
+        // Process in smaller chunks to avoid memory pressure and long transactions
+        final int batchSize = 100;
+        for (int i = 0; i < usersWithLegacyRole.size(); i += batchSize) {
+            int end = Math.min(i + batchSize, usersWithLegacyRole.size());
+            List<User> batch = usersWithLegacyRole.subList(i, end);
+            
+            for (User user : batch) {
+                user.getRoles().removeIf(role -> "ROLE_USER".equals(role.getName()));
+                boolean alreadyLecturer = user.getRoles().stream()
+                        .anyMatch(role -> "ROLE_LECTURER".equals(role.getName()));
+                if (!alreadyLecturer) {
+                    user.getRoles().add(lecturerRole);
+                }
+            }
+            userRepository.saveAll(batch);
+            log.info("Migrated batch of {} users ({} to {}).", batch.size(), i, end);
+        }
+        
+        log.info("Deleting legacy ROLE_USER...");
         roleRepository.delete(legacyUserRole);
-    }
-
-    private void dropLegacyIsPaidColumnIfExists() {
-        try {
-            String databaseProduct = jdbcTemplate.execute((ConnectionCallback<String>) connection ->
-                    connection.getMetaData().getDatabaseProductName());
-            if (databaseProduct == null || !databaseProduct.toLowerCase().contains("mysql")) {
-                log.info("Skipping users.is_paid cleanup for database type: {}", databaseProduct);
-                return;
-            }
-
-            Integer columnCount = jdbcTemplate.queryForObject(
-                    "SELECT COUNT(*) FROM information_schema.columns WHERE table_schema = DATABASE() AND table_name = ? AND column_name = ?",
-                    Integer.class,
-                    "users",
-                    "is_paid"
-            );
-            if (columnCount != null && columnCount > 0) {
-                log.info("Dropping legacy column users.is_paid");
-                jdbcTemplate.execute("ALTER TABLE users DROP COLUMN is_paid");
-                log.info("Dropped legacy column users.is_paid");
-            } else {
-                log.info("Legacy column users.is_paid not found; skipping");
-            }
-        } catch (DataAccessException ex) {
-            log.error("Failed while cleaning up legacy column users.is_paid", ex);
-            throw ex;
-        }
+        log.info("Roles initialization and legacy role migration completed.");
     }
 
     @Transactional
@@ -143,6 +122,11 @@ public class UserServiceImpl implements UserService {
 
         if (updatedUserDto.getEmail() != null && !updatedUserDto.getEmail().isEmpty()) {
             existingUser.setEmail(updatedUserDto.getEmail());
+        }
+
+        if (updatedUserDto.getUsername() != null && !updatedUserDto.getUsername().isEmpty()) {
+            existingUser.setUsername(updatedUserDto.getUsername());
+        } else if (updatedUserDto.getEmail() != null && !updatedUserDto.getEmail().isEmpty()) {
             existingUser.setUsername(updatedUserDto.getEmail());
         }
 

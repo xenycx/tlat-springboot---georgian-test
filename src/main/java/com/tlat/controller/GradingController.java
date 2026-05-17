@@ -20,6 +20,7 @@ import java.security.Principal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Controller
@@ -61,17 +62,18 @@ public class GradingController {
     @PreAuthorize("hasAnyRole('ADMIN','LECTURER')")
     @GetMapping("/attendance/{scheduleId}")
     public String showBatchAttendancePage(@PathVariable Long scheduleId, Model model) {
-        LectureSchedule schedule = scheduleRepository.findById(scheduleId)
+        Long nonNullScheduleId = Objects.requireNonNull(scheduleId, "scheduleId is required");
+        LectureSchedule schedule = scheduleRepository.findById(nonNullScheduleId)
                 .orElseThrow(() -> new IllegalArgumentException("განრიგი ვერ მოიძებნა"));
 
-        List<User> eligibleStudents = attendanceService.getEligibleStudentsForSchedule(scheduleId);
-        List<AttendanceRecord> existingRecords = attendanceService.getAttendanceForSchedule(scheduleId);
+        List<User> eligibleStudents = attendanceService.getEligibleStudentsForSchedule(nonNullScheduleId);
+        List<AttendanceRecord> existingRecords = attendanceService.getAttendanceForSchedule(nonNullScheduleId);
         
         Map<Long, AttendanceRecord> recordMap = existingRecords.stream()
                 .collect(Collectors.toMap(r -> r.getStudent().getId(), r -> r));
 
         AttendanceBatchDto batchDto = new AttendanceBatchDto();
-        batchDto.setScheduleId(scheduleId);
+        batchDto.setScheduleId(nonNullScheduleId);
         List<AttendanceBatchDto.StudentAttendanceDto> studentDtos = new ArrayList<>();
 
         for (User student : eligibleStudents) {
@@ -130,13 +132,14 @@ public class GradingController {
     @PreAuthorize("hasAnyRole('ADMIN','LECTURER')")
     @GetMapping("/ledger/view")
     public String viewLedger(@RequestParam String subject, @RequestParam Long groupId, Model model) {
-        List<GradingSummaryDto> grades = gradingService.getGradesForSubjectAndGroup(subject, groupId);
-        StudentGroup group = groupRepository.findById(groupId).orElse(null);
+        Long nonNullGroupId = Objects.requireNonNull(groupId, "groupId is required");
+        List<GradingSummaryDto> grades = gradingService.getGradesForSubjectAndGroup(subject, nonNullGroupId);
+        StudentGroup group = groupRepository.findById(nonNullGroupId).orElse(null);
         
         // Wrapper for form binding
         GradingSummaryForm form = new GradingSummaryForm();
         form.setSubject(subject);
-        form.setGroupId(groupId);
+        form.setGroupId(nonNullGroupId);
         form.setGrades(grades);
 
         model.addAttribute("form", form);

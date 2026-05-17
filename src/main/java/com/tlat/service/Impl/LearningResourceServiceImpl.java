@@ -8,7 +8,6 @@ import com.tlat.entity.Lecture;
 import com.tlat.entity.ResourceAuditAction;
 import com.tlat.entity.ResourceAuditLog;
 import com.tlat.entity.User;
-import com.tlat.entity.StudentGroup;
 import com.tlat.repository.StudentGroupRepository;
 import org.hibernate.Hibernate;
 import java.util.stream.Collectors;
@@ -131,7 +130,8 @@ public class LearningResourceServiceImpl implements LearningResourceService {
             resource.setTitle(form.getTitle().trim());
             
             if (form.getTargetGroupIds() != null && !form.getTargetGroupIds().isEmpty()) {
-                resource.setTargetGroups(studentGroupRepository.findAllById(form.getTargetGroupIds()));
+                resource.setTargetGroups(studentGroupRepository.findAllById(
+                        Objects.requireNonNull(form.getTargetGroupIds(), "targetGroupIds is required")));
             }
             resource.setDescription(form.getDescription());
             resource.setCategory(form.getCategory());
@@ -163,7 +163,8 @@ public class LearningResourceServiceImpl implements LearningResourceService {
         resource.setLecture(lecture);
         resource.setTitle(form.getTitle().trim());
         if (form.getTargetGroupIds() != null && !form.getTargetGroupIds().isEmpty()) {
-            resource.setTargetGroups(studentGroupRepository.findAllById(form.getTargetGroupIds()));
+            resource.setTargetGroups(studentGroupRepository.findAllById(
+                    Objects.requireNonNull(form.getTargetGroupIds(), "targetGroupIds is required")));
         } else {
             resource.getTargetGroups().clear();
         }

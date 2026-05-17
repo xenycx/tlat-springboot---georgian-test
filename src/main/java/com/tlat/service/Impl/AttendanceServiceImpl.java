@@ -15,6 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -41,7 +42,8 @@ public class AttendanceServiceImpl implements AttendanceService {
     @Override
     @Transactional
     public String generateAttendanceToken(Long scheduleId) {
-        LectureSchedule schedule = lectureScheduleRepository.findById(scheduleId)
+        Long nonNullScheduleId = Objects.requireNonNull(scheduleId, "scheduleId is required");
+        LectureSchedule schedule = lectureScheduleRepository.findById(nonNullScheduleId)
                 .orElseThrow(() -> new RuntimeException("განრიგი ვერ მოიძებნა"));
 
         String token = UUID.randomUUID().toString();
@@ -57,7 +59,8 @@ public class AttendanceServiceImpl implements AttendanceService {
     @Override
     @Transactional
     public void invalidateAttendanceToken(Long scheduleId) {
-        LectureSchedule schedule = lectureScheduleRepository.findById(scheduleId)
+        Long nonNullScheduleId = Objects.requireNonNull(scheduleId, "scheduleId is required");
+        LectureSchedule schedule = lectureScheduleRepository.findById(nonNullScheduleId)
                 .orElseThrow(() -> new RuntimeException("განრიგი ვერ მოიძებნა"));
         schedule.setAttendanceToken(null);
         schedule.setAttendanceTokenExpiry(null);
@@ -87,7 +90,8 @@ public class AttendanceServiceImpl implements AttendanceService {
     @Transactional
     public AttendanceRecord markAttendanceSelfIdentified(String token, Long studentId, HttpServletRequest request) {
         LectureSchedule schedule = validateAndGetSchedule(token);
-        User student = userRepository.findById(studentId)
+        Long nonNullStudentId = Objects.requireNonNull(studentId, "studentId is required");
+        User student = userRepository.findById(nonNullStudentId)
                 .orElseThrow(() -> new RuntimeException("სტუდენტი ვერ მოიძებნა"));
         validateStudentEligibility(schedule, student);
         checkDuplicate(schedule.getId(), student.getId());
@@ -107,14 +111,16 @@ public class AttendanceServiceImpl implements AttendanceService {
     @Override
     @Transactional
     public AttendanceRecord markAttendanceManual(Long scheduleId, Long studentId, User lecturer) {
-        LectureSchedule schedule = lectureScheduleRepository.findById(scheduleId)
+        Long nonNullScheduleId = Objects.requireNonNull(scheduleId, "scheduleId is required");
+        Long nonNullStudentId = Objects.requireNonNull(studentId, "studentId is required");
+        LectureSchedule schedule = lectureScheduleRepository.findById(nonNullScheduleId)
                 .orElseThrow(() -> new RuntimeException("განრიგი ვერ მოიძებნა"));
-        User student = userRepository.findById(studentId)
+        User student = userRepository.findById(nonNullStudentId)
                 .orElseThrow(() -> new RuntimeException("სტუდენტი ვერ მოიძებნა"));
         validateStudentEligibility(schedule, student);
 
-        if (attendanceRecordRepository.existsBySchedule_IdAndStudent_Id(scheduleId, studentId)) {
-            return attendanceRecordRepository.findBySchedule_IdAndStudent_Id(scheduleId, studentId).orElseThrow();
+        if (attendanceRecordRepository.existsBySchedule_IdAndStudent_Id(nonNullScheduleId, nonNullStudentId)) {
+            return attendanceRecordRepository.findBySchedule_IdAndStudent_Id(nonNullScheduleId, nonNullStudentId).orElseThrow();
         }
 
         AttendanceRecord record = new AttendanceRecord();
@@ -129,13 +135,26 @@ public class AttendanceServiceImpl implements AttendanceService {
     }
 
     @Override
+    @Transactional
+    public void verifyAttendance(Long recordId) {
+        Long nonNullRecordId = Objects.requireNonNull(recordId, "recordId is required");
+        AttendanceRecord record = attendanceRecordRepository.findById(nonNullRecordId)
+                .orElseThrow(() -> new RuntimeException("ჩანაწერი ვერ მოიძებნა"));
+        record.setVerified(true);
+        attendanceRecordRepository.save(record);
+        logger.info("Attendance verified: record={}", recordId);
+    }
+
+    @Override
     public List<AttendanceRecord> getAttendanceForSchedule(Long scheduleId) {
-        return attendanceRecordRepository.findBySchedule_IdOrderByAttendedAtAsc(scheduleId);
+        return attendanceRecordRepository.findBySchedule_IdOrderByAttendedAtAsc(
+                Objects.requireNonNull(scheduleId, "scheduleId is required"));
     }
 
     @Override
     public List<User> getEligibleStudentsForSchedule(Long scheduleId) {
-        LectureSchedule schedule = lectureScheduleRepository.findById(scheduleId)
+        Long nonNullScheduleId = Objects.requireNonNull(scheduleId, "scheduleId is required");
+        LectureSchedule schedule = lectureScheduleRepository.findById(nonNullScheduleId)
                 .orElseThrow(() -> new RuntimeException("განრიგი ვერ მოიძებნა"));
 
         List<StudentGroup> groups = schedule.getLecture().getGroups();
@@ -148,7 +167,7 @@ public class AttendanceServiceImpl implements AttendanceService {
 
     @Override
     public long getAttendanceCount(Long scheduleId) {
-        return attendanceRecordRepository.countBySchedule_Id(scheduleId);
+        return attendanceRecordRepository.countBySchedule_Id(Objects.requireNonNull(scheduleId, "scheduleId is required"));
     }
 
     @Override

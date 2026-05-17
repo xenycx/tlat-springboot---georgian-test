@@ -42,21 +42,19 @@ public class PdfExportServiceImpl implements PdfExportService {
             Document document = new Document(pdfDoc);
             document.setMargins(50, 40, 50, 40);
 
-            // ქართული ფონტის მხარდაჭერა - Sylfaen საუკეთესო მხარდაჭერას უზრუნველყოფს ქართულისთვის
+            // ქართული ფონტის მხარდაჭერა
             PdfFont georgianFont;
             try {
-                // Sylfaen-ის დირექტორია C:\Windows\Fonts-ში
-                georgianFont = PdfFontFactory.createFont("C:/Windows/Fonts/sylfaen.ttf", PdfEncodings.IDENTITY_H, 
+                // Try to load from a path that exists on Linux
+                georgianFont = PdfFontFactory.createFont("FreeSans.ttf", PdfEncodings.IDENTITY_H, 
                         PdfFontFactory.EmbeddingStrategy.FORCE_EMBEDDED);
             } catch (Exception e) {
                 try {
-                    // სხვა ფონტი თუ რატომღაც არ მუშაობს Sylfaen-ი
-                    georgianFont = PdfFontFactory.createFont("C:/Windows/Fonts/georgia.ttf", PdfEncodings.IDENTITY_H, 
+                    georgianFont = PdfFontFactory.createFont("DejaVuSans.ttf", PdfEncodings.IDENTITY_H, 
                             PdfFontFactory.EmbeddingStrategy.FORCE_EMBEDDED);
                 } catch (Exception ex) {
-                    // ბოლო შანსი თუ არცერთმა არ იმუშავა
-                    georgianFont = PdfFontFactory.createFont("C:/Windows/Fonts/arial.ttf", PdfEncodings.IDENTITY_H, 
-                            PdfFontFactory.EmbeddingStrategy.FORCE_EMBEDDED);
+                    // Fallback to standard font if no Georgian font is found
+                    georgianFont = PdfFontFactory.createFont();
                 }
             }
             document.setFont(georgianFont);
@@ -188,18 +186,19 @@ public class PdfExportServiceImpl implements PdfExportService {
             Document document = new Document(pdfDoc);
             document.setMargins(50, 40, 50, 40);
 
-            // ქართული ფონტის მხარდაჭერა - Sylfaen საუკეთესო მხარდაჭერას უზრუნველყოფს ქართულისთვის
+            // ქართული ფონტის მხარდაჭერა
             PdfFont georgianFont;
             try {
-                georgianFont = PdfFontFactory.createFont("C:/Windows/Fonts/sylfaen.ttf", PdfEncodings.IDENTITY_H, 
+                // Try to load from a path that exists on Linux
+                georgianFont = PdfFontFactory.createFont("FreeSans.ttf", PdfEncodings.IDENTITY_H, 
                         PdfFontFactory.EmbeddingStrategy.FORCE_EMBEDDED);
             } catch (Exception e) {
                 try {
-                    georgianFont = PdfFontFactory.createFont("C:/Windows/Fonts/georgia.ttf", PdfEncodings.IDENTITY_H, 
+                    georgianFont = PdfFontFactory.createFont("DejaVuSans.ttf", PdfEncodings.IDENTITY_H, 
                             PdfFontFactory.EmbeddingStrategy.FORCE_EMBEDDED);
                 } catch (Exception ex) {
-                    georgianFont = PdfFontFactory.createFont("C:/Windows/Fonts/arial.ttf", PdfEncodings.IDENTITY_H, 
-                            PdfFontFactory.EmbeddingStrategy.FORCE_EMBEDDED);
+                    // Fallback to standard font if no Georgian font is found
+                    georgianFont = PdfFontFactory.createFont();
                 }
             }
             document.setFont(georgianFont);

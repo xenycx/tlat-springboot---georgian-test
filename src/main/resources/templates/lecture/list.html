@@ -63,87 +63,110 @@
                     <thead class="table-dark">
                         <tr>
                             <th class="d-none d-lg-table-cell">ID</th>
-                            <th>ოთახი</th>
-                            <th class="d-none d-md-table-cell">თარიღი</th>
-                            <th>დრო</th>
+                            <th>საგანი</th>
                             <th class="d-none d-lg-table-cell">ლექტორი</th>
-                            <th class="d-none d-md-table-cell">საგანი</th>
-                            <th>მოქმედება</th>
-                            <th>სტატუსი</th>
+                            <th>განრიგები</th>
+                            <th>მოქმედება (კურსი)</th>
                         </tr>
                     </thead>
                     <tbody>
-                        <tr th:each="lecture : ${lectures}">
+                        <!-- Master Row -->
+                        <tr class="lecture-master-row" th:each="lecture : ${lectures}">
+                            
                             <td class="d-none d-lg-table-cell" th:text="${lecture.id}"></td>
-                            <td th:text="${lecture.roomNumber}"></td>
-                            <td class="d-none d-md-table-cell" th:text="${#temporals.format(lecture.date, 'yyyy-MM-dd')}"></td>
-                            <td>
-                                <span th:text="${#temporals.format(lecture.startTime, 'HH:mm')}"></span>
-                                <span class="d-none d-sm-inline">-</span>
-                                <span class="d-none d-sm-inline" th:text="${#temporals.format(lecture.endTime, 'HH:mm')}"></span>
-                            </td>
+                            <td th:text="${lecture.subject}"></td>
                             <td class="d-none d-lg-table-cell" th:text="${lecture.lecturer}"></td>
-                            <td class="d-none d-md-table-cell" th:text="${lecture.subject}"></td>
+                            <td>
+                                <button class="btn btn-sm btn-outline-primary rounded-pill btn-animated shadow-sm" type="button" 
+                                        data-bs-toggle="offcanvas" th:data-bs-target="'#offcanvasLecture-' + ${lecture.id}">
+                                    <i class="bi bi-calendar3"></i> 
+                                    <span th:text="${#lists.size(lecture.schedules)} + ' შეხვედრა'"></span>
+                                </button>
+                            </td>
                             <td>
                                 <div class="action-buttons">
-                                    <!-- ადმინისტრატორის მოქმედებები -->
                                     <div sec:authorize="hasRole('ADMIN')" class="btn-group-responsive">
                                         <a th:href="@{/lectures/edit/{id}(id=${lecture.id})}" class="btn btn-primary btn-sm btn-animated" title="რედაქტირება">
                                             <i class="bi bi-pencil"></i><span class="d-none d-xl-inline"> რედაქტირება</span>
                                         </a>
-                                        <a th:href="@{/lectures/delete/{id}(id=${lecture.id})}" class="btn btn-danger btn-sm btn-animated" title="წაშლა">
+                                        <a th:href="@{/lectures/delete/{id}(id=${lecture.id})}" class="btn btn-danger btn-sm btn-animated" title="წაშლა" onclick="return confirm('დარწმუნებული ხართ რომ გსურთ კურსის და ყველა მისი განრიგის წაშლა?');">
                                             <i class="bi bi-trash"></i><span class="d-none d-xl-inline"> წაშლა</span>
-                                        </a>
-                                    </div>
-                                    
-                                    <!-- ლექტორის/ადმინის მოქმედებები -->
-                                    <div sec:authorize="hasAnyRole('ADMIN','LECTURER')" class="btn-group-responsive">
-                                        <form th:if="${lecture != null && #strings.toString(lecture.status) == 'SCHEDULED'}" 
-                                              th:action="@{/lectures/start/{id}(id=${lecture.scheduleId})}" 
-                                              method="post" style="display: inline;">
-                                            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
-                                            <button type="submit" class="btn btn-success btn-sm btn-animated" title="დაწყება">
-                                                <i class="bi bi-play-fill"></i><span class="d-none d-xl-inline"> დაწყება</span>
-                                            </button>
-                                        </form>
-                                        
-                                        <form th:if="${lecture != null && #strings.toString(lecture.status) == 'IN_PROGRESS'}" 
-                                              th:action="@{/lectures/stop/{id}(id=${lecture.scheduleId})}" 
-                                              method="post" style="display: inline;">
-                                            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
-                                            <button type="submit" class="btn btn-warning btn-sm btn-animated" title="Stop">
-                                                <i class="bi bi-stop-fill"></i><span class="d-none d-xl-inline"> Stop</span>
-                                            </button>
-                                        </form>
-
-                                        <!-- Attendance button for IN_PROGRESS lectures -->
-                                        <a th:if="${lecture != null && #strings.toString(lecture.status) == 'IN_PROGRESS' && lecture.scheduleId != null}" 
-                                           th:href="@{/attendance/review/{id}(id=${lecture.scheduleId})}" 
-                                           class="btn btn-info btn-sm btn-animated" title="დასწრება">
-                                            <i class="bi bi-clipboard-check"></i><span class="d-none d-xl-inline"> დასწრება</span>
-                                        </a>
-                                        
-                                        <!-- Attendance review for completed lectures -->
-                                        <a th:if="${lecture != null && #strings.toString(lecture.status) == 'COMPLETED' && lecture.scheduleId != null}" 
-                                           th:href="@{/attendance/review/{id}(id=${lecture.scheduleId})}" 
-                                           class="btn btn-outline-info btn-sm btn-animated" title="დასწრება">
-                                            <i class="bi bi-clipboard-data"></i><span class="d-none d-xl-inline"> დასწრება</span>
                                         </a>
                                     </div>
                                 </div>
                             </td>
-                            <td>
-                                <span th:if="${lecture != null && lecture.status != null}"
-                                      th:class="${'badge badge-status ' + 
-                                      (#strings.toString(lecture.status) == 'SCHEDULED' ? 'bg-primary' : 
-                                       (#strings.toString(lecture.status) == 'IN_PROGRESS' ? 'bg-warning badge-status-in-progress' :
-                                        (#strings.toString(lecture.status) == 'COMPLETED' ? 'bg-success' : 'bg-danger')))}">
-                                    <span th:text="${lecture.status.displayName}"></span>
-                                </span>
-                            </td>
                         </tr>
                     </tbody>
                 </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Offcanvas Menus for Schedules -->
+        <div th:each="lecture : ${lectures}" class="offcanvas offcanvas-end shadow" tabindex="-1" th:id="'offcanvasLecture-' + ${lecture.id}" style="width: 500px;">
+            <div class="offcanvas-header bg-light border-bottom">
+                <div>
+                    <h5 class="offcanvas-title fw-bold mb-1" th:text="${lecture.subject}"></h5>
+                    <small class="text-muted"><i class="bi bi-person"></i> <span th:text="${lecture.lecturer}"></span></small>
+                </div>
+                <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+            </div>
+            <div class="offcanvas-body p-0">
+                <div th:if="${#lists.isEmpty(lecture.schedules)}" class="p-4 text-center text-muted">
+                    <i class="bi bi-calendar-x fs-1 d-block mb-2"></i>
+                    განრიგი არ არის დამატებული
+                </div>
+                
+                <div th:if="${!#lists.isEmpty(lecture.schedules)}" class="list-group list-group-flush rounded-0">
+                    <div th:each="schedule : ${lecture.schedules}" class="list-group-item p-3 border-bottom hover-bg-light">
+                        <div class="d-flex justify-content-between align-items-start mb-2">
+                            <div>
+                                <h6 class="mb-0 fw-bold text-primary">
+                                    <i class="bi bi-geo-alt"></i> ოთახი: <span th:text="${schedule.roomNumber}"></span>
+                                </h6>
+                                <small class="text-muted d-block mt-1">
+                                    <i class="bi bi-calendar-event"></i> <span th:text="${#temporals.format(schedule.date, 'yyyy-MM-dd')}"></span> | 
+                                    <i class="bi bi-clock"></i> <span th:text="${#temporals.format(schedule.startTime, 'HH:mm')}"></span> - <span th:text="${#temporals.format(schedule.endTime, 'HH:mm')}"></span>
+                                </small>
+                            </div>
+                            <span th:class="${'badge rounded-pill ' + 
+                                  (#strings.toString(schedule.status) == 'SCHEDULED' ? 'bg-primary' : 
+                                   (#strings.toString(schedule.status) == 'IN_PROGRESS' ? 'bg-warning text-dark' :
+                                    (#strings.toString(schedule.status) == 'COMPLETED' ? 'bg-success' : 'bg-danger')))}">
+                                <span th:text="${schedule.status.displayName}"></span>
+                            </span>
+                        </div>
+                        
+                        <div class="mt-3 text-end">
+                            <div sec:authorize="hasAnyRole('ADMIN','LECTURER')" class="btn-group">
+                                <form th:if="${#strings.toString(schedule.status) == 'SCHEDULED'}" 
+                                      th:action="@{/lectures/start/{id}(id=${schedule.id})}" 
+                                      method="post" class="d-inline">
+                                    <button type="submit" class="btn btn-outline-success btn-sm btn-animated me-1">
+                                        <i class="bi bi-play-fill"></i> დაწყება
+                                    </button>
+                                </form>
+                                
+                                <form th:if="${#strings.toString(schedule.status) == 'IN_PROGRESS'}" 
+                                      th:action="@{/lectures/stop/{id}(id=${schedule.id})}" 
+                                      method="post" class="d-inline">
+                                    <button type="submit" class="btn btn-outline-warning btn-sm btn-animated me-1">
+                                        <i class="bi bi-stop-fill"></i> შეჩერება
+                                    </button>
+                                </form>
+
+                                <a th:if="${#strings.toString(schedule.status) == 'IN_PROGRESS' || #strings.toString(schedule.status) == 'COMPLETED'}" 
+                                   th:href="@{/attendance/review/{id}(id=${schedule.id})}" 
+                                   class="btn btn-outline-info btn-sm btn-animated me-1">
+                                    <i class="bi bi-clipboard-check"></i> დასწრება
+                                </a>
+                                
+                                <a th:href="@{/lectures/{lid}/schedules/delete/{sid}(lid=${lecture.id}, sid=${schedule.id})}" class="btn btn-outline-danger btn-sm btn-animated delete-schedule-btn">
+                                    <i class="bi bi-trash"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -292,7 +315,7 @@
         
         // Apply staggered animations to all table rows
         document.addEventListener('DOMContentLoaded', function() {
-            const tableRows = document.querySelectorAll('.table-animated tbody tr');
+            const tableRows = document.querySelectorAll('.table-animated tbody tr.lecture-master-row');
             tableRows.forEach((row, index) => {
                 row.style.animationDelay = (index * 0.05) + 's';
             });

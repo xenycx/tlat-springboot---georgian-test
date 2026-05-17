@@ -26,7 +26,8 @@ public class GradingServiceImpl implements GradingService {
     @Override
     @Transactional
     public void saveBatchAttendance(AttendanceBatchDto batchDto, Long currentUserId) {
-        LectureSchedule schedule = scheduleRepository.findById(batchDto.getScheduleId())
+        Long scheduleId = Objects.requireNonNull(batchDto.getScheduleId(), "scheduleId is required");
+        LectureSchedule schedule = scheduleRepository.findById(scheduleId)
                 .orElseThrow(() -> new IllegalArgumentException("Invalid schedule ID"));
 
         User addedBy = null;
@@ -35,7 +36,8 @@ public class GradingServiceImpl implements GradingService {
         }
 
         for (AttendanceBatchDto.StudentAttendanceDto dto : batchDto.getStudents()) {
-            User student = userRepository.findById(dto.getStudentId())
+            Long studentId = Objects.requireNonNull(dto.getStudentId(), "studentId is required");
+            User student = userRepository.findById(studentId)
                     .orElseThrow(() -> new IllegalArgumentException("Invalid student ID: " + dto.getStudentId()));
 
             Optional<AttendanceRecord> existingRecordOpt = attendanceRecordRepository
@@ -69,7 +71,8 @@ public class GradingServiceImpl implements GradingService {
     @Override
     @Transactional(readOnly = true)
     public List<GradingSummaryDto> getGradesForSubjectAndGroup(String subject, Long groupId) {
-        StudentGroup group = studentGroupRepository.findById(groupId)
+        Long nonNullGroupId = Objects.requireNonNull(groupId, "groupId is required");
+        StudentGroup group = studentGroupRepository.findById(nonNullGroupId)
                 .orElseThrow(() -> new IllegalArgumentException("Invalid group ID"));
 
         // Get all students in this group
@@ -79,7 +82,7 @@ public class GradingServiceImpl implements GradingService {
         }
 
         // Get all student grades for this subject and group
-        List<StudentGrade> grades = studentGradeRepository.findBySubjectAndGroupId(subject, groupId);
+        List<StudentGrade> grades = studentGradeRepository.findBySubjectAndGroupId(subject, nonNullGroupId);
         Map<Long, StudentGrade> gradeMap = grades.stream()
                 .collect(Collectors.toMap(g -> g.getStudent().getId(), g -> g));
 
@@ -93,7 +96,7 @@ public class GradingServiceImpl implements GradingService {
             dto.setStudentId(student.getId());
             dto.setStudentName(student.getName());
             dto.setSubject(subject);
-            dto.setGroupId(groupId);
+            dto.setGroupId(nonNullGroupId);
 
             StudentGrade grade = gradeMap.get(student.getId());
             if (grade != null) {
@@ -102,7 +105,7 @@ public class GradingServiceImpl implements GradingService {
             }
 
             // Calculate attendance score. A simple query per student to get sum of scores:
-            Double attScore = attendanceRecordRepository.sumScoreByStudentIdAndSubjectAndGroupId(student.getId(), subject, groupId);
+            Double attScore = attendanceRecordRepository.sumScoreByStudentIdAndSubjectAndGroupId(student.getId(), subject, nonNullGroupId);
             dto.setAttendanceScore(attScore != null ? attScore : 0.0);
 
             summaries.add(dto);
@@ -113,15 +116,17 @@ public class GradingServiceImpl implements GradingService {
     @Override
     @Transactional
     public void saveMidtermAndFinalScores(String subject, Long groupId, List<GradingSummaryDto> dtos) {
-        StudentGroup group = studentGroupRepository.findById(groupId)
+        Long nonNullGroupId = Objects.requireNonNull(groupId, "groupId is required");
+        StudentGroup group = studentGroupRepository.findById(nonNullGroupId)
                 .orElseThrow(() -> new IllegalArgumentException("Invalid group ID"));
 
         for (GradingSummaryDto dto : dtos) {
-            User student = userRepository.findById(dto.getStudentId())
+            Long studentId = Objects.requireNonNull(dto.getStudentId(), "studentId is required");
+            User student = userRepository.findById(studentId)
                     .orElseThrow(() -> new IllegalArgumentException("Invalid student ID: " + dto.getStudentId()));
 
             Optional<StudentGrade> existingGrade = studentGradeRepository
-                    .findByStudentIdAndSubjectAndGroupId(student.getId(), subject, groupId);
+                .findByStudentIdAndSubjectAndGroupId(student.getId(), subject, nonNullGroupId);
 
             StudentGrade grade;
             if (existingGrade.isPresent()) {

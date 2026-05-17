@@ -1,6 +1,7 @@
 package com.tlat.service.Impl;
 
 import com.tlat.dto.LectureDto;
+import com.tlat.dto.ScheduleDetailDto;
 import com.tlat.entity.Lecture;
 import com.tlat.entity.LearningResource;
 import com.tlat.entity.LectureSchedule;
@@ -241,6 +242,11 @@ public class LectureServiceImpl implements LectureService {
             learningResourceStorageService.delete(resource.getStoredFilename());
             learningResourceRepository.delete(resource);
         }
+        
+        // Remove many-to-many associations to prevent constraint violations
+        lecture.getGroups().clear();
+        lecture.getLecturers().clear();
+        lectureRepository.saveAndFlush(lecture);
 
         lectureRepository.delete(Objects.requireNonNull(lecture, "lecture must not be null"));
     }
@@ -427,6 +433,20 @@ public class LectureServiceImpl implements LectureService {
 
         List<LectureSchedule> schedules = lectureScheduleRepository.findByLecture_IdOrderByDateAscStartTimeAsc(lecture.getId());
         dto.setScheduleCount(schedules.size());
+        
+        List<ScheduleDetailDto> scheduleDtos = schedules.stream().map(schedule -> {
+            ScheduleDetailDto sDto = new ScheduleDetailDto();
+            sDto.setId(schedule.getId());
+            sDto.setDate(schedule.getDate());
+            sDto.setStartTime(schedule.getStartTime());
+            sDto.setEndTime(schedule.getEndTime());
+            sDto.setRoomNumber(schedule.getRoom().getRoomNumber());
+            sDto.setStatus(schedule.getStatus());
+            sDto.setIsActive(schedule.getIsActive());
+            return sDto;
+        }).collect(Collectors.toList());
+        dto.setSchedules(scheduleDtos);
+
         if (!schedules.isEmpty()) {
             LectureSchedule next = schedules.get(0);
             dto.setScheduleId(next.getId());
