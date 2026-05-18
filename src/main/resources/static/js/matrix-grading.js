@@ -11,9 +11,13 @@ document.addEventListener('DOMContentLoaded', () => {
     lectureSelect.addEventListener('change', () => {
         if (lectureSelect.value) {
             groupSelect.disabled = false;
+            // Automatically select "ყველა ჯგუფი" when lecture is selected
+            groupSelect.value = "0";
+            loadMatrixBtn.disabled = false;
         } else {
             groupSelect.disabled = true;
             loadMatrixBtn.disabled = true;
+            groupSelect.value = "";
         }
     });
 
@@ -86,7 +90,7 @@ document.addEventListener('DOMContentLoaded', () => {
         // Populate table filter groups
         const uniqueGroups = [...new Set(data.rows.map(r => r.studentGroupName))].sort();
         const tableGroupSelect = document.getElementById('tableGroupSelect');
-        tableGroupSelect.innerHTML = '<option value="">ყველა ჯგუფი</option>';
+        tableGroupSelect.innerHTML = '<option value="" selected>ყველა ჯგუფი</option>';
         uniqueGroups.forEach(g => {
             tableGroupSelect.innerHTML += `<option value="${g}">${g}</option>`;
         });

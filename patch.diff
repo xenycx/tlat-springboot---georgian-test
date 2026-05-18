@@ -1,0 +1,83 @@
+--- src/main/java/com/tlat/service/Impl/PdfExportServiceImpl.java
++++ src/main/java/com/tlat/service/Impl/PdfExportServiceImpl.java
+@@ -48,19 +48,8 @@
+             document.setMargins(50, 40, 50, 40);
+ 
+             // ქართული ფონტის მხარდაჭერა
+-            PdfFont georgianFont;
+-            try {
+-                // Try to load from a path that exists on Linux
+-                georgianFont = PdfFontFactory.createFont("FreeSans.ttf", PdfEncodings.IDENTITY_H, 
+-                        PdfFontFactory.EmbeddingStrategy.FORCE_EMBEDDED);
+-            } catch (Exception e) {
+-                try {
+-                    georgianFont = PdfFontFactory.createFont("DejaVuSans.ttf", PdfEncodings.IDENTITY_H, 
+-                            PdfFontFactory.EmbeddingStrategy.FORCE_EMBEDDED);
+-                } catch (Exception ex) {
+-                    // Fallback to standard font if no Georgian font is found
+-                    georgianFont = PdfFontFactory.createFont();
+-                }
+-            }
+-            document.setFont(georgianFont);
++            PdfFont georgianFont = getGeorgianFont();
++            if (georgianFont != null) {
++                document.setFont(georgianFont);
++            }
+ 
+@@ -194,19 +183,8 @@
+             document.setMargins(50, 40, 50, 40);
+ 
+             // ქართული ფონტის მხარდაჭერა
+-            PdfFont georgianFont;
+-            try {
+-                // Try to load from a path that exists on Linux
+-                georgianFont = PdfFontFactory.createFont("FreeSans.ttf", PdfEncodings.IDENTITY_H, 
+-                        PdfFontFactory.EmbeddingStrategy.FORCE_EMBEDDED);
+-            } catch (Exception e) {
+-                try {
+-                    georgianFont = PdfFontFactory.createFont("DejaVuSans.ttf", PdfEncodings.IDENTITY_H, 
+-                            PdfFontFactory.EmbeddingStrategy.FORCE_EMBEDDED);
+-                } catch (Exception ex) {
+-                    // Fallback to standard font if no Georgian font is found
+-                    georgianFont = PdfFontFactory.createFont();
+-                }
+-            }
+-            document.setFont(georgianFont);
++            PdfFont georgianFont = getGeorgianFont();
++            if (georgianFont != null) {
++                document.setFont(georgianFont);
++            }
+ 
+@@ -375,6 +353,32 @@
+         return baos;
+     }
+ 
++    private PdfFont getGeorgianFont() {
++        String[] fontPaths = {
++            "/usr/share/fonts/truetype/freefont/FreeSans.ttf",
++            "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf",
++            "/usr/share/fonts/dejavu/DejaVuSans.ttf",
++            "/usr/share/fonts/liberation/LiberationSans-Regular.ttf",
++            "C:\\Windows\\Fonts\\sylfaen.ttf",
++            "C:\\Windows\\Fonts\\arial.ttf"
++        };
++        
++        for (String path : fontPaths) {
++            java.io.File file = new java.io.File(path);
++            if (file.exists() && file.canRead()) {
++                try {
++                    return PdfFontFactory.createFont(path, PdfEncodings.IDENTITY_H, PdfFontFactory.EmbeddingStrategy.FORCE_EMBEDDED);
++                } catch (Exception ignored) { }
++            }
++        }
++        
++        try {
++            return PdfFontFactory.createFont("FreeSans.ttf", PdfEncodings.IDENTITY_H, PdfFontFactory.EmbeddingStrategy.FORCE_EMBEDDED);
++        } catch (Exception e) {
++            try { return PdfFontFactory.createFont(); } catch (Exception ex) { return null; }
++        }
++    }
++
+     private Cell createSummaryCell(String label, String value) {
+         Paragraph content = new Paragraph()
+                 .add(new Paragraph(label).setBold().setFontSize(10))

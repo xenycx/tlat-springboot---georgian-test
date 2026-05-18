@@ -7,6 +7,7 @@ import com.tlat.service.PdfExportService;
 import com.tlat.service.RoomService;
 import com.tlat.service.StudentGroupService;
 import com.tlat.service.UserService;
+import com.tlat.service.CsvExportService;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
@@ -35,6 +36,7 @@ public class LectureController {
     private final UserService userService;
     private final StudentGroupService studentGroupService;
     private final PdfExportService pdfExportService;
+    private final CsvExportService csvExportService;
 
     @Autowired
     public LectureController(
@@ -42,12 +44,14 @@ public class LectureController {
             RoomService roomService,
             UserService userService,
             StudentGroupService studentGroupService,
-            PdfExportService pdfExportService) {
+            PdfExportService pdfExportService,
+            CsvExportService csvExportService) {
         this.lectureService = lectureService;
         this.roomService = roomService;
         this.userService = userService;
         this.studentGroupService = studentGroupService;
         this.pdfExportService = pdfExportService;
+        this.csvExportService = csvExportService;
     }
 
     @GetMapping
@@ -344,6 +348,30 @@ public class LectureController {
         }
     }
 
+    @GetMapping("/export/csv/all")
+    public ResponseEntity<byte[]> exportAllLecturesCsv(Principal principal) {
+        try {
+            User user = userService.findUserByEmail(principal.getName());
+            List<LectureDto> lectures = getAccessibleLectures(user);
+
+            ByteArrayOutputStream csvStream = csvExportService.generateLecturesCsv(lectures);
+
+            String filename = "all_lectures_" +
+                    LocalDate.now().format(DateTimeFormatter.ofPattern("yyyyMMdd")) + ".csv";
+
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.parseMediaType("text/csv; charset=UTF-8"));
+            headers.setContentDispositionFormData("attachment", filename);
+            headers.setCacheControl("must-revalidate, post-check=0, pre-check=0");
+
+            return ResponseEntity.ok()
+                    .headers(headers)
+                    .body(csvStream.toByteArray());
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().build();
+        }
+    }
+
     @GetMapping("/export/pdf/filtered")
     public ResponseEntity<byte[]> exportFilteredLecturesPdf(
             @RequestParam(required = false) String startDate,
@@ -448,6 +476,30 @@ public class LectureController {
             return ResponseEntity.ok()
                     .headers(headers)
                     .body(excelStream.toByteArray());
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().build();
+        }
+    }
+
+    @GetMapping("/export/csv/today")
+    public ResponseEntity<byte[]> exportTodayLecturesCsv(Principal principal) {
+        try {
+            User user = userService.findUserByEmail(principal.getName());
+            List<LectureDto> todaysLectures = getAccessibleTodaysLectures(user);
+
+            ByteArrayOutputStream csvStream = csvExportService.generateLecturesCsv(todaysLectures);
+
+            String filename = "todays_lectures_" +
+                    LocalDate.now().format(DateTimeFormatter.ofPattern("yyyyMMdd")) + ".csv";
+
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.parseMediaType("text/csv; charset=UTF-8"));
+            headers.setContentDispositionFormData("attachment", filename);
+            headers.setCacheControl("must-revalidate, post-check=0, pre-check=0");
+
+            return ResponseEntity.ok()
+                    .headers(headers)
+                    .body(csvStream.toByteArray());
         } catch (Exception e) {
             return ResponseEntity.internalServerError().build();
         }

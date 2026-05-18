@@ -28,9 +28,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import org.apache.commons.csv.CSVFormat;
+import org.apache.commons.csv.CSVParser;
+import org.apache.commons.csv.CSVRecord;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -336,33 +338,58 @@ public class LectureServiceImpl implements LectureService {
     @Transactional
     public void importLecturesFromCsv(MultipartFile file) {
         List<String> errors = new ArrayList<>();
-        int lineNumber = 1;
 
-        try (BufferedReader reader = new BufferedReader(new InputStreamReader(file.getInputStream()))) {
-            reader.readLine();
+        try (InputStreamReader isr = new InputStreamReader(file.getInputStream(), java.nio.charset.StandardCharsets.UTF_8);
+                 CSVParser parser = CSVFormat.DEFAULT.parse(isr)) {
 
-            String line;
-            while ((line = reader.readLine()) != null) {
-                lineNumber++;
+            List<CSVRecord> records = parser.getRecords();
+            int startIndex = 0; // index to start processing (skip header if detected)
+            if (!records.isEmpty()) {
+                CSVRecord first = records.get(0);
+                boolean firstLooksLikeData = false;
                 try {
-                    String[] values = line.split(",");
-                    if (values.length < 7) {
+                    String maybeDate = first.size() > 1 ? first.get(1) : "";
+                    java.time.LocalDate.parse(maybeDate.trim());
+                    firstLooksLikeData = true;
+                } catch (Exception ex) {
+                    firstLooksLikeData = false;
+                }
+                if (!firstLooksLikeData) {
+                    startIndex = 1; // skip header
+                }
+            }
+
+            for (int idx = startIndex; idx < records.size(); idx++) {
+                CSVRecord record = records.get(idx);
+                int lineNumber = idx + 1;
+                try {
+                    String room = record.size() > 0 ? record.get(0) : "";
+                    String date = record.size() > 1 ? record.get(1) : "";
+                    String startTime = record.size() > 2 ? record.get(2) : "";
+                    String endTime = record.size() > 3 ? record.get(3) : "";
+                    String lecturersRaw = record.size() > 4 ? record.get(4) : "";
+                    String subject = record.size() > 5 ? record.get(5) : "";
+                    String groupsRaw = record.size() > 6 ? record.get(6) : "";
+
+                    if (room == null || room.isBlank() || date == null || date.isBlank()) {
                         throw new RuntimeException("ფორმატი უნდა იყოს: ოთახი,თარიღი,დაწყება,დასრულება,ლექტორები,საგანი,ჯგუფები");
                     }
 
                     LectureDto dto = new LectureDto();
-                    dto.setRoomNumber(values[0].trim());
-                    dto.setDate(LocalDate.parse(values[1].trim()));
-                    dto.setStartTime(LocalTime.parse(values[2].trim()));
-                    dto.setEndTime(LocalTime.parse(values[3].trim()));
-                    String[] lecturerNames = values[4].split(";");
+                    dto.setRoomNumber(room.trim());
+                    dto.setDate(LocalDate.parse(date.trim()));
+                    dto.setStartTime(LocalTime.parse(startTime.trim()));
+                    dto.setEndTime(LocalTime.parse(endTime.trim()));
+
+                    String[] lecturerNames = lecturersRaw.split(";");
                     List<Long> lecturerIds = resolveLecturerIdsFromNames(lecturerNames);
                     dto.setLecturerIds(lecturerIds);
                     dto.setLecturer(String.join(", ", lecturerNames));
-                    dto.setSubject(values[5].trim());
+
+                    dto.setSubject(subject == null ? "" : subject.trim());
                     dto.setStatus(LectureStatus.SCHEDULED);
 
-                    String[] groupCodes = values[6].split(";");
+                    String[] groupCodes = groupsRaw.split(";");
                     List<Long> groupIds = new ArrayList<>();
                     for (String code : groupCodes) {
                         StudentGroup group = studentGroupRepository.findByCode(code.trim());
@@ -378,6 +405,7 @@ public class LectureServiceImpl implements LectureService {
                     errors.add("Line " + lineNumber + ": " + e.getMessage());
                 }
             }
+
         } catch (IOException e) {
             throw new RuntimeException("CSV ფაილის წაკითხვა ვერ მოხერხდა: " + e.getMessage());
         }

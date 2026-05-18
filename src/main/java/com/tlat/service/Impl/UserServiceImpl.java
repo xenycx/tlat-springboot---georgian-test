@@ -62,13 +62,13 @@ public class UserServiceImpl implements UserService {
         }
 
         log.info("Found {} users with legacy ROLE_USER to migrate.", usersWithLegacyRole.size());
-        
+
         // Process in smaller chunks to avoid memory pressure and long transactions
         final int batchSize = 100;
         for (int i = 0; i < usersWithLegacyRole.size(); i += batchSize) {
             int end = Math.min(i + batchSize, usersWithLegacyRole.size());
-            List<User> batch = usersWithLegacyRole.subList(i, end);
-            
+            List<User> batch = new ArrayList<>(usersWithLegacyRole.subList(i, end));
+
             for (User user : batch) {
                 user.getRoles().removeIf(role -> "ROLE_USER".equals(role.getName()));
                 boolean alreadyLecturer = user.getRoles().stream()
@@ -80,7 +80,7 @@ public class UserServiceImpl implements UserService {
             userRepository.saveAll(batch);
             log.info("Migrated batch of {} users ({} to {}).", batch.size(), i, end);
         }
-        
+
         log.info("Deleting legacy ROLE_USER...");
         roleRepository.delete(legacyUserRole);
         log.info("Roles initialization and legacy role migration completed.");
@@ -237,7 +237,8 @@ public class UserServiceImpl implements UserService {
         if (userDto.getGroupId() == null) {
             throw new IllegalArgumentException("Student group is required");
         }
-        StudentGroup group = studentGroupRepository.findById(Objects.requireNonNull(userDto.getGroupId(), "groupId is required"))
+        StudentGroup group = studentGroupRepository
+                .findById(Objects.requireNonNull(userDto.getGroupId(), "groupId is required"))
                 .orElseThrow(() -> new EntityNotFoundException("Student group not found"));
         user.setStudentGroup(group);
     }

@@ -43,10 +43,21 @@ public class PdfExportServiceImpl implements PdfExportService {
             document.setMargins(50, 40, 50, 40);
 
             // ქართული ფონტის მხარდაჭერა
-            PdfFont georgianFont = getGeorgianFont();
-            if (georgianFont != null) {
-                document.setFont(georgianFont);
+            PdfFont georgianFont;
+            try {
+                // Try to load from a path that exists on Linux
+                georgianFont = PdfFontFactory.createFont("FreeSans.ttf", PdfEncodings.IDENTITY_H, 
+                        PdfFontFactory.EmbeddingStrategy.FORCE_EMBEDDED);
+            } catch (Exception e) {
+                try {
+                    georgianFont = PdfFontFactory.createFont("DejaVuSans.ttf", PdfEncodings.IDENTITY_H, 
+                            PdfFontFactory.EmbeddingStrategy.FORCE_EMBEDDED);
+                } catch (Exception ex) {
+                    // Fallback to standard font if no Georgian font is found
+                    georgianFont = PdfFontFactory.createFont();
+                }
             }
+            document.setFont(georgianFont);
 
             // დეკორატიული ჰედერი
             Table headerBox = new Table(1).useAllAvailableWidth();
@@ -176,10 +187,21 @@ public class PdfExportServiceImpl implements PdfExportService {
             document.setMargins(50, 40, 50, 40);
 
             // ქართული ფონტის მხარდაჭერა
-            PdfFont georgianFont = getGeorgianFont();
-            if (georgianFont != null) {
-                document.setFont(georgianFont);
+            PdfFont georgianFont;
+            try {
+                // Try to load from a path that exists on Linux
+                georgianFont = PdfFontFactory.createFont("FreeSans.ttf", PdfEncodings.IDENTITY_H, 
+                        PdfFontFactory.EmbeddingStrategy.FORCE_EMBEDDED);
+            } catch (Exception e) {
+                try {
+                    georgianFont = PdfFontFactory.createFont("DejaVuSans.ttf", PdfEncodings.IDENTITY_H, 
+                            PdfFontFactory.EmbeddingStrategy.FORCE_EMBEDDED);
+                } catch (Exception ex) {
+                    // Fallback to standard font if no Georgian font is found
+                    georgianFont = PdfFontFactory.createFont();
+                }
             }
+            document.setFont(georgianFont);
 
             Table headerBox = new Table(1).useAllAvailableWidth();
             Cell headerCell = new Cell()
@@ -299,36 +321,6 @@ public class PdfExportServiceImpl implements PdfExportService {
         }
 
         return baos;
-    }
-
-    private PdfFont getGeorgianFont() {
-        String[] fontPaths = {
-            "/usr/share/fonts/TTF/DejaVuSans.ttf",             // Arch Linux
-            "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf", // Ubuntu/Debian
-            "/usr/share/fonts/dejavu/DejaVuSans.ttf",          // Fedora/CentOS
-            "/usr/share/fonts/truetype/freefont/FreeSans.ttf", // Ubuntu/Debian
-            "/usr/share/fonts/liberation/LiberationSans-Regular.ttf",
-            "C:\\Windows\\Fonts\\sylfaen.ttf",                 // Windows Sylfaen
-            "C:\\Windows\\Fonts\\arial.ttf"                    // Windows Arial
-        };
-
-        for (String path : fontPaths) {
-            java.io.File file = new java.io.File(path);
-            if (file.exists() && file.canRead()) {
-                try {
-                    return PdfFontFactory.createFont(path, PdfEncodings.IDENTITY_H, PdfFontFactory.EmbeddingStrategy.FORCE_EMBEDDED);
-                } catch (Exception ignored) { }
-            }
-        }
-        
-        try {
-            return PdfFontFactory.createFont("DejaVuSans.ttf", PdfEncodings.IDENTITY_H, PdfFontFactory.EmbeddingStrategy.FORCE_EMBEDDED);
-        } catch (Exception e) {
-            try { return PdfFontFactory.createFont("FreeSans.ttf", PdfEncodings.IDENTITY_H, PdfFontFactory.EmbeddingStrategy.FORCE_EMBEDDED); } 
-            catch (Exception ex) { 
-                try { return PdfFontFactory.createFont(); } catch (Exception last) { return null; }
-            }
-        }
     }
 
     private Cell createSummaryCell(String label, String value) {

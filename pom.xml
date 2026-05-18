@@ -110,6 +110,12 @@
 			<artifactId>javase</artifactId>
 			<version>3.5.3</version>
 		</dependency>
+		<!-- CSV parsing/writing -->
+		<dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-csv</artifactId>
+			<version>1.10.0</version>
+		</dependency>
 	</dependencies>
 
 	<build>
